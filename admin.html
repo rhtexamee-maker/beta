@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Geek Shop | Admin Terminal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+  <script type="module" src="script.js"></script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .cyber-lattice {
+      background-image: radial-gradient(circle at 1px 1px, rgba(236, 215, 255, 0.05) 1px, transparent 0);
+      background-size: 40px 40px;
+    }
+  </style>
+  <script id="tailwind-config">
+    tailwind.config = { /* same config as index.html above */ }
+  </script>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+  <!-- Sidebar -->
+  <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-950 py-8 z-50">
+    <div class="px-8 mb-12">
+      <h1 class="font-headline font-black text-purple-400 text-2xl tracking-tighter">Geek Admin</h1>
+      <p class="font-body text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Terminal Access</p>
+    </div>
+    <nav class="flex-1">
+      <ul class="space-y-1">
+        <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
+        <li><a class="flex items-center gap-3 bg-purple-500/10 text-purple-300 rounded-r-full py-3 px-6 border-l-4 border-purple-400 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
+        <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
+      </ul>
+    </nav>
+    <div class="px-6 mt-auto">
+      <button onclick="logoutAdmin()" class="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold tracking-widest transition-colors">LOGOUT</button>
+    </div>
+  </aside>
+
+  <main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
+      <div class="flex justify-between items-center px-8 py-6 w-full max-w-screen-2xl mx-auto">
+        <div class="flex items-center gap-4">
+          <h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface">Inventory Management</h2>
+        </div>
+      </div>
+    </header>
+
+    <section class="p-8 space-y-8 flex-1">
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Stats cards populated or static as per your design -->
+        <!-- You can enhance with real counts from JS later -->
+      </div>
+
+      <!-- Add Product Form (keep your original form, just restyle with Tailwind) -->
+      <div id="add-product-form" class="bg-surface-container-low rounded-2xl p-8">
+        <!-- Your original add product fields go here with Tailwind classes -->
+        <!-- Example: -->
+        <h2 class="text-2xl font-headline mb-6">Add New Product</h2>
+        <!-- Paste your form fields and style them with Tailwind (row, input, etc.) -->
+      </div>
+
+      <!-- Products Table -->
+      <div id="admin-panel" class="bg-surface-container-low rounded-2xl overflow-hidden">
+        <div class="px-8 py-6 border-b border-white/5">
+          <h3 class="font-headline font-bold text-xl">Product Database</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left" id="products-table">
+            <!-- Populated by renderDataTable() in script.js -->
+          </table>
+        </div>
+      </div>
+
+      <!-- Orders Section -->
+      <div class="bg-surface-container-low rounded-2xl p-8">
+        <h3 class="font-headline font-bold text-xl mb-6">Recent Orders</h3>
+        <div id="orders-body" class="space-y-4">
+          <!-- Populated by renderOrdersTable() -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 w-full flex justify-around md:hidden ...">
+    <!-- same as index.html -->
+  </nav>
+</body>
+</html>
