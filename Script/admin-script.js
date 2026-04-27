@@ -10,7 +10,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Login Form Handler
+const loginPanel = document.getElementById('login-panel');
+const adminPanel = document.getElementById('admin-panel');
+
+// Login
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('admin-email').value;
@@ -24,48 +27,43 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 });
 
 // Logout
-window.logoutAdmin = () => {
-  signOut(auth).then(() => window.location.reload());
-};
+window.logoutAdmin = () => signOut(auth).then(() => location.reload());
 
-// Show/Hide Panels
-function togglePanels(user) {
-  const loginPanel = document.getElementById('login-panel');
-  const adminPanel = document.getElementById('admin-panel');
-
+// Show panels based on auth
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    loginPanel.style.display = 'none';
-    adminPanel.style.display = 'block';
+    loginPanel.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
     loadAdminData();
   } else {
-    loginPanel.style.display = 'block';
-    adminPanel.style.display = 'none';
+    loginPanel.classList.remove('hidden');
+    adminPanel.classList.add('hidden');
   }
-}
+});
 
-// Load Data
+// Load data
 async function loadAdminData() {
-  await renderProductsTable();
+  renderProducts();
+  renderOrders();
 }
 
 // Render Products
-async function renderProductsTable() {
+async function renderProducts() {
   const tbody = document.getElementById('products-body');
-  if (!tbody) return;
-
   tbody.innerHTML = '';
 
   const snapshot = await getDocs(collection(db, 'products'));
-  snapshot.forEach((docSnap) => {
+  snapshot.forEach(docSnap => {
     const p = { id: docSnap.id, ...docSnap.data() };
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${p.name}</td>
-      <td>${p.category}</td>
-      <td>${p.availability}</td>
-      <td>৳${p.price}</td>
-      <td>${p.stock}</td>
-      <td><button onclick="deleteProduct('${p.id}')" class="text-red-400">Delete</button></td>
+      <td class="px-8 py-6 font-medium">${p.name}</td>
+      <td class="px-8 py-6">${p.category}</td>
+      <td class="px-8 py-6">৳${p.price}</td>
+      <td class="px-8 py-6">${p.stock}</td>
+      <td class="px-8 py-6">
+        <button onclick="deleteProduct('${p.id}')" class="text-red-400 hover:text-red-500">Delete</button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -74,37 +72,65 @@ async function renderProductsTable() {
 window.deleteProduct = async (id) => {
   if (confirm("Delete this product?")) {
     await deleteDoc(doc(db, 'products', id));
-    renderProductsTable();
+    renderProducts();
   }
 };
 
-// Add Product Form
+// Add Product
 document.getElementById('add-product-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const data = {
-    name: document.getElementById('add-name').value,
+    name: document.getElementById('add-name').value.trim(),
     price: Number(document.getElementById('add-price').value),
     discount: Number(document.getElementById('add-discount').value) || 0,
-    images: document.getElementById('add-images').value.split(',').map(u => u.trim()),
+    images: document.getElementById('add-images').value.split(',').map(u => u.trim()).filter(Boolean),
     category: document.getElementById('add-category').value,
-    color: document.getElementById('add-color').value,
-    stock: Number(document.getElementById('add-stock').value),
+    color: document.getElementById('add-color').value.trim(),
+    stock: Number(document.getElementById('add-stock').value) || 0,
     availability: document.getElementById('add-availability').value,
     hotDeal: document.getElementById('add-hotdeal').checked,
-    description: document.getElementById('add-desc').value,
-    detailedDescription: document.getElementById('add-detailed-desc').value
+    description: document.getElementById('add-desc').value.trim(),
+    detailedDescription: document.getElementById('add-detailed-desc').value.trim()
   };
 
   try {
     await addDoc(collection(db, 'products'), data);
     alert('Product added successfully!');
     e.target.reset();
-    renderProductsTable();
+    renderProducts();
   } catch (err) {
-    alert('Error: ' + err.message);
+    alert('Error adding product: ' + err.message);
   }
 });
 
-// Auth State
-onAuthStateChanged(auth, togglePanels);
+// Render Orders (simple version)
+async function renderOrders() {
+  const container = document.getElementById('orders-body');
+  container.innerHTML = '<p class="text-slate-400">Loading orders...</p>';
+
+  try {
+    const q = query(collection(db, 'orders'), orderBy('timeISO', 'desc'));
+    const snapshot = await getDocs(q);
+    container.innerHTML = '';
+
+    snapshot.forEach(docSnap => {
+      const o = docSnap.data();
+      const div = document.createElement('div');
+      div.className = "p-4 bg-surface-container rounded-xl flex justify-between items-center";
+      div.innerHTML = `
+        <div>
+          <p class="font-medium">${o.customerName || 'Customer'}</p>
+          <p class="text-sm text-slate-400">${o.timeISO ? new Date(o.timeISO).toLocaleString() : ''}</p>
+        </div>
+        <div class="text-right">
+          <p class="font-bold">৳${o.total || 0}</p>
+          <p class="text-xs ${o.status === 'Delivered' ? 'text-green-400' : 'text-yellow-400'}">${o.status || 'Pending'}</p>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    container.innerHTML = '<p class="text-red-400">Failed to load orders</p>';
+  }
+}
