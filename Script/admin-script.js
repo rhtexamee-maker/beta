@@ -1,11 +1,14 @@
-// Script/admin-script.js - Non-module version for reliability
+// Script/admin-script.js
 
-// Initialize Firebase (global variables)
-const firebaseConfig = { /* Paste your firebaseConfig here from config.js */ };
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, orderBy, query } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+import { firebaseConfig } from '../config.js';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Login Form
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -14,61 +17,81 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const pass = document.getElementById('admin-pass').value;
 
   try {
-    await auth.signInWithEmailAndPassword(email, pass);
+    await signInWithEmailAndPassword(auth, email, pass);
   } catch (err) {
     alert('Login failed: ' + err.message);
   }
 });
 
 window.logoutAdmin = () => {
-  auth.signOut().then(() => location.reload());
+  signOut(auth).then(() => window.location.reload());
 };
 
-// Auth State Listener
-auth.onAuthStateChanged((user) => {
+// Tab Switching (already in HTML)
+onAuthStateChanged(auth, (user) => {
+  const loginPanel = document.getElementById('login-panel');
+  const adminPanel = document.getElementById('admin-panel');
+
   if (user) {
-    document.getElementById('login-panel').classList.add('hidden');
-    document.getElementById('admin-panel').classList.remove('hidden');
+    loginPanel.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
     loadAdminData();
   } else {
-    document.getElementById('login-panel').classList.remove('hidden');
-    document.getElementById('admin-panel').classList.add('hidden');
+    loginPanel.classList.remove('hidden');
+    adminPanel.classList.add('hidden');
   }
 });
 
 async function loadAdminData() {
-  renderProducts();
-  renderOrders();
+  await renderProducts();
+  await renderOrders();
 }
 
-// Render Products with Editable Fields
+// ==================== PRODUCTS - Editable like original ====================
 async function renderProducts() {
   const tbody = document.getElementById('products-body');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
-  const snapshot = await db.collection('products').get();
-  snapshot.forEach(docSnap => {
+  const snapshot = await getDocs(collection(db, 'products'));
+
+  snapshot.forEach((docSnap) => {
     const p = { id: docSnap.id, ...docSnap.data() };
 
     const tr = document.createElement('tr');
+    tr.className = "hover:bg-white/[0.02] transition-colors";
+
     tr.innerHTML = `
-      <td class="px-8 py-6"><div contenteditable="true" class="product-name">${p.name || ''}</div></td>
+      <td class="px-8 py-6">
+        <div contenteditable="true" data-field="name" class="editable">${p.name || ''}</div>
+      </td>
       <td class="px-8 py-6">${p.category || ''}</td>
-      <td class="px-8 py-6 text-right"><div contenteditable="true" class="product-price">${p.price || 0}</div></td>
-      <td class="px-8 py-6 text-right"><div contenteditable="true" class="product-discount">${p.discount || 0}</div></td>
-      <td class="px-8 py-6 text-right"><div contenteditable="true" class="product-stock">${p.stock || 0}</div></td>
+      <td class="px-8 py-6 text-right">
+        <div contenteditable="true" data-field="price" class="editable">${p.price || 0}</div>
+      </td>
+      <td class="px-8 py-6 text-right">
+        <div contenteditable="true" data-field="discount" class="editable">${p.discount || 0}</div>
+      </td>
+      <td class="px-8 py-6 text-right">
+        <div contenteditable="true" data-field="stock" class="editable">${p.stock || 0}</div>
+      </td>
       <td class="px-8 py-6">
         <button onclick="deleteProduct('${p.id}')" class="text-red-400 hover:text-red-500">Delete</button>
       </td>
     `;
 
-    // Save on blur
-    tr.querySelectorAll('[contenteditable="true"]').forEach(el => {
+    // Auto-save on blur
+    tr.querySelectorAll('.editable').forEach(el => {
       el.addEventListener('blur', async () => {
-        const field = el.className.split('-')[1];
+        const field = el.dataset.field;
         let value = el.textContent.trim();
-        if (field === 'price' || field === 'discount' || field === 'stock') value = Number(value);
-        await db.collection('products').doc(p.id).update({ [field]: value });
+        if (['price', 'discount', 'stock'].includes(field)) value = Number(value) || 0;
+
+        try {
+          await updateDoc(doc(db, 'products', p.id), { [field]: value });
+        } catch (err) {
+          console.error('Update failed', err);
+        }
       });
     });
 
@@ -77,13 +100,13 @@ async function renderProducts() {
 }
 
 window.deleteProduct = async (id) => {
-  if (confirm("Delete this product?")) {
-    await db.collection('products').doc(id).delete();
+  if (confirm("Delete this product permanently?")) {
+    await deleteDoc(doc(db, 'products', id));
     renderProducts();
   }
 };
 
-// Add Product
+// Add Product Form
 document.getElementById('add-product-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -102,28 +125,31 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
   };
 
   try {
-    await db.collection('products').add(data);
+    await addDoc(collection(db, 'products'), data);
     alert('Product added successfully!');
     e.target.reset();
     renderProducts();
   } catch (err) {
-    alert('Error: ' + err.message);
+    alert('Error adding product: ' + err.message);
   }
 });
 
-// Render Orders
+// Orders
 async function renderOrders() {
   const container = document.getElementById('orders-body');
+  if (!container) return;
   container.innerHTML = '';
 
-  const snapshot = await db.collection('orders').orderBy('timeISO', 'desc').get();
+  const q = query(collection(db, 'orders'), orderBy('timeISO', 'desc'));
+  const snapshot = await getDocs(q);
+
   snapshot.forEach(docSnap => {
     const o = docSnap.data();
     const div = document.createElement('div');
     div.className = "p-4 bg-surface-container-lowest rounded-xl flex justify-between items-center";
     div.innerHTML = `
       <div>
-        <p class="font-medium">${o.customerName || 'Customer'}</p>
+        <p class="font-medium">${o.customerName || 'Unknown'}</p>
         <p class="text-xs text-slate-400">${o.timeISO ? new Date(o.timeISO).toLocaleString() : ''}</p>
       </div>
       <div class="text-right">
