@@ -4,13 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Geek Shop | Admin Terminal</title>
+  
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
-  <script type="module" src="script.js"></script>
+  
+  <!-- Dedicated Admin Script -->
+  <script type="module" src="Script/admin-script.js"></script>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#323949",
+            "surface-container": "#191f2f",
+            "surface-container-low": "#141b2b",
+            "surface-container-high": "#232a3a",
+            "surface-container-highest": "#2e3545",
+            "surface-container-lowest": "#070e1d",
+            "surface": "#0c1322",
+            "primary": "#ecd7ff",
+            "primary-container": "#d8b4fe",
+            "on-surface": "#dce2f7",
+            "on-surface-variant": "#cdc3d0",
+            "background": "#0c1322"
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
     .material-symbols-outlined {
@@ -22,79 +50,122 @@
       background-size: 40px 40px;
     }
   </style>
-  <script id="tailwind-config">
-    tailwind.config = { /* same config as index.html above */ }
-  </script>
 </head>
 <body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
-  <!-- Sidebar -->
-  <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-950 py-8 z-50">
-    <div class="px-8 mb-12">
-      <h1 class="font-headline font-black text-purple-400 text-2xl tracking-tighter">Geek Admin</h1>
-      <p class="font-body text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Terminal Access</p>
-    </div>
-    <nav class="flex-1">
-      <ul class="space-y-1">
-        <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
-        <li><a class="flex items-center gap-3 bg-purple-500/10 text-purple-300 rounded-r-full py-3 px-6 border-l-4 border-purple-400 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
-        <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
-      </ul>
-    </nav>
-    <div class="px-6 mt-auto">
-      <button onclick="logoutAdmin()" class="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold tracking-widest transition-colors">LOGOUT</button>
-    </div>
-  </aside>
 
-  <main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
-    <!-- Top Bar -->
-    <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
-      <div class="flex justify-between items-center px-8 py-6 w-full max-w-screen-2xl mx-auto">
-        <div class="flex items-center gap-4">
-          <h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface">Inventory Management</h2>
-        </div>
-      </div>
-    </header>
-
-    <section class="p-8 space-y-8 flex-1">
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Stats cards populated or static as per your design -->
-        <!-- You can enhance with real counts from JS later -->
-      </div>
-
-      <!-- Add Product Form (keep your original form, just restyle with Tailwind) -->
-      <div id="add-product-form" class="bg-surface-container-low rounded-2xl p-8">
-        <!-- Your original add product fields go here with Tailwind classes -->
-        <!-- Example: -->
-        <h2 class="text-2xl font-headline mb-6">Add New Product</h2>
-        <!-- Paste your form fields and style them with Tailwind (row, input, etc.) -->
-      </div>
-
-      <!-- Products Table -->
-      <div id="admin-panel" class="bg-surface-container-low rounded-2xl overflow-hidden">
-        <div class="px-8 py-6 border-b border-white/5">
-          <h3 class="font-headline font-bold text-xl">Product Database</h3>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left" id="products-table">
-            <!-- Populated by renderDataTable() in script.js -->
-          </table>
-        </div>
-      </div>
-
-      <!-- Orders Section -->
-      <div class="bg-surface-container-low rounded-2xl p-8">
-        <h3 class="font-headline font-bold text-xl mb-6">Recent Orders</h3>
-        <div id="orders-body" class="space-y-4">
-          <!-- Populated by renderOrdersTable() -->
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-0 w-full flex justify-around md:hidden ...">
-    <!-- same as index.html -->
+<!-- Sidebar Navigation -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-950 py-8 z-50">
+  <div class="px-8 mb-12">
+    <h1 class="font-headline font-black text-purple-400 text-2xl tracking-tighter">Geek Admin</h1>
+    <p class="font-body text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Terminal Access</p>
+  </div>
+  <nav class="flex-1">
+    <ul class="space-y-1">
+      <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 transition-all duration-200 ease-in-out font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
+      <li><a class="flex items-center gap-3 bg-purple-500/10 text-purple-300 rounded-r-full py-3 px-6 border-l-4 border-purple-400 font-body text-sm uppercase tracking-widest transition-all duration-200 ease-in-out" href="#"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
+      <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 transition-all duration-200 ease-in-out font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
+    </ul>
   </nav>
+  <div class="px-6 mt-auto">
+    <div class="bg-surface-container-low rounded-xl p-4 border border-white/5">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary-container"></div>
+        <div>
+          <p class="text-xs font-bold text-on-surface">Admin User</p>
+          <p class="text-[10px] text-slate-500">Root Access</p>
+        </div>
+      </div>
+      <button onclick="logoutAdmin()" class="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold tracking-widest transition-colors">
+        LOGOUT
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
+    <div class="flex justify-between items-center px-8 py-6 w-full max-w-screen-2xl mx-auto">
+      <div class="flex items-center gap-4">
+        <h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface">Inventory Management</h2>
+        <span class="px-3 py-1 bg-primary-container/20 text-primary-container text-[10px] font-black rounded-full uppercase tracking-widest">Live Sync</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <section class="p-8 space-y-8 flex-1">
+    <!-- Quick Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Static stats for now - can be made dynamic later -->
+      <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 relative overflow-hidden group">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Products</p>
+        <p id="total-products" class="text-3xl font-headline font-bold text-on-surface mt-2">0</p>
+      </div>
+      <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 relative overflow-hidden group">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Low Stock</p>
+        <p id="low-stock" class="text-3xl font-headline font-bold text-on-surface mt-2">0</p>
+      </div>
+      <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 relative overflow-hidden group">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Pending Orders</p>
+        <p id="pending-orders" class="text-3xl font-headline font-bold text-on-surface mt-2">0</p>
+      </div>
+    </div>
+
+    <!-- Add New Product Button -->
+    <div class="flex justify-end">
+      <button onclick="showAddProductForm()" 
+              class="px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed rounded-xl font-bold tracking-widest hover:scale-105 transition-all">
+        + Add New Product
+      </button>
+    </div>
+
+    <!-- Product Table -->
+    <div class="bg-surface-container-low rounded-2xl overflow-hidden border border-white/5">
+      <div class="px-8 py-6 border-b border-white/5">
+        <h3 class="font-headline font-bold text-xl text-on-surface">Product Database</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-surface-container-lowest text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <th class="px-8 py-4">Product</th>
+              <th class="px-8 py-4">Category</th>
+              <th class="px-8 py-4">Status</th>
+              <th class="px-8 py-4 text-right">Price</th>
+              <th class="px-8 py-4 text-right">Stock</th>
+              <th class="px-8 py-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-body" class="divide-y divide-white/5">
+            <!-- Populated by admin-script.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="bg-surface-container-low rounded-2xl p-8">
+      <h3 class="font-headline font-bold text-xl text-on-surface mb-6">Recent Orders</h3>
+      <div id="orders-body" class="space-y-4">
+        <!-- Populated by admin-script.js -->
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 md:hidden bg-[#0c1322]/80 backdrop-blur-lg border-t border-white/5 z-50">
+  <a href="index.html" class="flex flex-col items-center justify-center text-slate-500">
+    <span class="material-symbols-outlined">home</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
+  </a>
+  <a href="admin.html" class="flex flex-col items-center justify-center bg-purple-500/20 text-purple-200 rounded-xl px-4 py-1">
+    <span class="material-symbols-outlined">admin_panel_settings</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Admin</span>
+  </a>
+</nav>
+
 </body>
 </html>
