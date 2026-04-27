@@ -1,166 +1,179 @@
-// Script/admin-script.js
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Geek Shop | Admin Terminal</title>
+  <meta name="description" content="Admin panel for The Geek Shop - Manage products, inventory and orders">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-import { firebaseConfig } from '../config.js';
+  <!-- Firebase CDN (non-module) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  <!-- Admin Script - Plain script (no type=module) -->
+  <script src="Script/admin-script.js"></script>
 
-// Login
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('admin-email').value.trim();
-  const pass = document.getElementById('admin-pass').value.trim();
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-  } catch (err) {
-    alert('Login failed: ' + err.message);
-  }
-});
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#323949",
+            "surface-container": "#191f2f",
+            "surface-container-low": "#141b2b",
+            "surface-container-high": "#232a3a",
+            "surface-container-highest": "#2e3545",
+            "surface-container-lowest": "#070e1d",
+            "surface": "#0c1322",
+            "primary": "#ecd7ff",
+            "primary-container": "#d8b4fe",
+            "on-surface": "#dce2f7"
+          }
+        }
+      }
+    }
+  </script>
 
-window.logoutAdmin = () => signOut(auth).then(() => location.reload());
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .cyber-lattice {
+      background-image: radial-gradient(circle at 1px 1px, rgba(236, 215, 255, 0.05) 1px, transparent 0);
+      background-size: 40px 40px;
+    }
+    .nav-link.active {
+      background-color: rgb(236 215 255 / 0.1);
+      color: #ecd7ff;
+      border-left: 4px solid #ecd7ff;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body">
 
-// Auth State
-onAuthStateChanged(auth, (user) => {
-  const loginPanel = document.getElementById('login-panel');
-  const adminPanel = document.getElementById('admin-panel');
-  if (user) {
-    loginPanel?.classList.add('hidden');
-    adminPanel?.classList.remove('hidden');
-    loadAdminData();
-  } else {
-    loginPanel?.classList.remove('hidden');
-    adminPanel?.classList.add('hidden');
-  }
-});
+<!-- Sidebar (Exact from your revamped code) -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-950 py-8 z-50">
+  <div class="px-8 mb-12">
+    <h1 class="font-headline font-black text-purple-400 text-2xl tracking-tighter">Geek Admin</h1>
+    <p class="font-body text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Terminal Access</p>
+  </div>
+  <nav class="flex-1">
+    <ul class="space-y-1">
+      <li><a href="#" data-tab="dashboard" class="nav-link active flex items-center gap-3 py-3 px-6 rounded-r-full font-body text-sm uppercase tracking-widest"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
+      <li><a href="#" data-tab="inventory" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full font-body text-sm uppercase tracking-widest"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
+      <li><a href="#" data-tab="orders" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full font-body text-sm uppercase tracking-widest"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
+    </ul>
+  </nav>
+  <div class="px-6 mt-auto">
+    <button onclick="logoutAdmin()" class="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold tracking-widest transition-colors">LOGOUT</button>
+  </div>
+</aside>
 
-async function loadAdminData() {
-  await renderProducts();
-}
+<main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
+  <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
+    <div class="flex justify-between items-center px-8 py-6 max-w-screen-2xl mx-auto">
+      <h2 id="page-title" class="font-headline text-2xl font-bold tracking-tight text-on-surface">Dashboard</h2>
+    </div>
+  </header>
 
-// Render Products with click-to-edit
-async function renderProducts() {
-  const tbody = document.getElementById('products-body');
-  if (!tbody) return;
-  tbody.innerHTML = '';
+  <section class="p-8 space-y-8 flex-1">
 
-  const snapshot = await getDocs(collection(db, 'products'));
-  snapshot.forEach((docSnap) => {
-    const p = { id: docSnap.id, ...docSnap.data() };
-    const tr = document.createElement('tr');
-    tr.className = "hover:bg-white/[0.02] cursor-pointer";
-    tr.innerHTML = `
-      <td class="px-8 py-6">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-surface-container-highest rounded-lg overflow-hidden">
-            ${p.images && p.images[0] ? `<img src="${p.images[0]}" class="w-full h-full object-cover">` : ''}
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content">
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 relative overflow-hidden group">
+          <div class="absolute -right-4 -top-4 text-primary/5 group-hover:text-primary/10 transition-colors">
+            <span class="material-symbols-outlined !text-7xl">inventory_2</span>
           </div>
-          <div>
-            <p class="font-medium">${p.name || 'Untitled'}</p>
-          </div>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Products</p>
+          <p id="total-products" class="text-3xl font-headline font-bold text-on-surface mt-2">0</p>
         </div>
-      </td>
-      <td class="px-8 py-6">${p.category || '-'}</td>
-      <td class="px-8 py-6 text-right">৳${p.price || 0}</td>
-      <td class="px-8 py-6 text-right">${p.stock || 0}</td>
-      <td class="px-8 py-6 text-center">
-        <button onclick="editProduct('${p.id}'); event.stopImmediatePropagation()" class="material-symbols-outlined text-slate-400 hover:text-primary">edit</button>
-      </td>
-    `;
-    tr.addEventListener('click', () => editProduct(p.id));
-    tbody.appendChild(tr);
-  });
-}
+        <!-- You can add the other 3 stat cards if you want -->
+      </div>
 
-// Full Editable Modal
-window.editProduct = async (id) => {
-  // Fetch product
-  const snapshot = await getDocs(collection(db, 'products'));
-  let product = null;
-  snapshot.forEach(docSnap => {
-    if (docSnap.id === id) product = { id: docSnap.id, ...docSnap.data() };
-  });
-
-  if (!product) return alert("Product not found");
-
-  const modal = document.createElement('div');
-  modal.innerHTML = `
-    <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4">
-      <div class="bg-surface-container-low rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-auto">
-        <h2 class="font-headline text-2xl font-bold mb-6">Edit Product</h2>
-        <form id="edit-form" class="space-y-6">
-          <input type="hidden" id="edit-id" value="${id}">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div><label>Name</label><input id="edit-name" value="${product.name || ''}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-            <div><label>Price</label><input id="edit-price" type="number" value="${product.price || 0}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-            <div><label>Discount</label><input id="edit-discount" type="number" value="${product.discount || 0}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-            <div><label>Stock</label><input id="edit-stock" type="number" value="${product.stock || 0}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-            <div><label>Category</label><input id="edit-category" value="${product.category || ''}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-            <div><label>Color</label><input id="edit-color" value="${product.color || ''}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
+      <!-- Add New Product Form -->
+      <div class="mt-10 bg-surface-container-low rounded-2xl p-8">
+        <h3 class="font-headline text-2xl font-bold mb-6">Add New Product</h3>
+        <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div><label class="block mb-1 text-sm">Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Image URLs (comma separated)</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Category</label>
+            <select id="add-category" required class="w-full px-4 py-3 bg-surface rounded-xl">
+              <option value="Keycaps">Keycaps</option>
+              <option value="Switches">Switches</option>
+              <option value="Keyboard and Mouse">Keyboard and Mouse</option>
+              <option value="Accessories and Collectables">Accessories and Collectables</option>
+            </select>
           </div>
-          <div><label>Image URLs (comma separated)</label><input id="edit-images" value="${product.images ? product.images.join(', ') : ''}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-          <div><label>Specification (HTML supported)</label><textarea id="edit-spec" class="w-full px-4 py-3 bg-surface rounded-2xl h-24">${product.specification || ''}</textarea></div>
-          <div><label>Detailed Description (HTML supported)</label><textarea id="edit-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-2xl h-32">${product.detailedDescription || ''}</textarea></div>
-          <div class="flex gap-4">
-            <button type="button" onclick="closeEditModal()" class="flex-1 py-4 bg-surface-container rounded-2xl">Cancel</button>
-            <button type="submit" class="flex-1 py-4 bg-primary text-on-primary rounded-2xl font-bold">Save Changes</button>
+          <div><label class="block mb-1 text-sm">Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div class="md:col-span-2">
+            <label class="block mb-1 text-sm">Specification (supports HTML tags)</label>
+            <textarea id="add-spec" class="w-full px-4 py-3 bg-surface rounded-xl h-24" placeholder="<b>Bold</b>, <i>italic</i>, lists etc."></textarea>
           </div>
+          <div class="md:col-span-2">
+            <label class="block mb-1 text-sm">Detailed Description (supports HTML tags)</label>
+            <textarea id="add-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-32"></textarea>
+          </div>
+          <button type="submit" class="md:col-span-2 py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed rounded-xl font-black">Add New Product</button>
         </form>
       </div>
     </div>
-  `;
-  document.body.appendChild(modal);
 
-  document.getElementById('edit-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const updateData = {
-      name: document.getElementById('edit-name').value.trim(),
-      price: Number(document.getElementById('edit-price').value),
-      discount: Number(document.getElementById('edit-discount').value) || 0,
-      stock: Number(document.getElementById('edit-stock').value) || 0,
-      category: document.getElementById('edit-category').value.trim(),
-      color: document.getElementById('edit-color').value.trim(),
-      images: document.getElementById('edit-images').value.split(',').map(u => u.trim()).filter(Boolean),
-      specification: document.getElementById('edit-spec').value.trim(),
-      detailedDescription: document.getElementById('edit-detailed-desc').value.trim()
-    };
+    <!-- INVENTORY -->
+    <div id="tab-inventory" class="tab-content hidden">
+      <div class="bg-surface-container-low rounded-2xl overflow-hidden">
+        <div class="px-8 py-6 border-b">
+          <h3 class="font-headline font-bold text-xl">All Products</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-surface-container-lowest text-xs uppercase tracking-widest text-slate-500">
+                <th class="px-8 py-4 text-left">Product Info</th>
+                <th class="px-8 py-4">Category</th>
+                <th class="px-8 py-4 text-right">Price</th>
+                <th class="px-8 py-4 text-right">Stock</th>
+                <th class="px-8 py-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="products-body" class="divide-y divide-white/5"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-    await updateDoc(doc(db, 'products', id), updateData);
-    alert('Product updated!');
-    closeEditModal();
-    renderProducts();
+    <!-- ORDERS -->
+    <div id="tab-orders" class="tab-content hidden">
+      <div class="bg-surface-container-low rounded-2xl p-8">
+        <h3 class="font-headline font-bold text-xl mb-6">All Orders</h3>
+        <div id="orders-body" class="space-y-4"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Tab Switching -->
+<script>
+  document.querySelectorAll('[data-tab]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById('tab-' + link.dataset.tab).classList.remove('hidden');
+      document.getElementById('page-title').textContent = link.textContent.trim();
+    });
   });
-};
-
-window.closeEditModal = () => {
-  const modal = document.querySelector('#edit-modal') || document.querySelector('.fixed.inset-0');
-  if (modal) modal.remove();
-};
-
-// Add Product
-document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const data = {
-    name: document.getElementById('add-name').value.trim(),
-    price: Number(document.getElementById('add-price').value),
-    discount: Number(document.getElementById('add-discount').value) || 0,
-    images: document.getElementById('add-images').value.split(',').map(u => u.trim()).filter(Boolean),
-    category: document.getElementById('add-category').value,
-    stock: Number(document.getElementById('add-stock').value) || 0,
-    specification: document.getElementById('add-spec').value.trim(),
-    detailedDescription: document.getElementById('add-detailed-desc').value.trim()
-  };
-
-  try {
-    await addDoc(collection(db, 'products'), data);
-    alert('Product added successfully!');
-    e.target.reset();
-    renderProducts();
-  } catch (err) {
-    alert('Error: ' + err.message);
-  }
-});
+</script>
+</body>
+</html>
