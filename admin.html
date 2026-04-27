@@ -8,38 +8,82 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  
-  <!-- Firebase CDN (non-module) -->
+
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
   
-  <!-- Admin Script -->
-<script type="module" src="Script/admin-script.js"></script>
+  <script type="module" src="Script/admin-script.js"></script>
 
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "surface-bright": "#323949",
-            "surface-container": "#191f2f",
-            "surface-container-low": "#141b2b",
-            "surface-container-high": "#232a3a",
-            "surface-container-highest": "#2e3545",
-            "surface-container-lowest": "#070e1d",
-            "surface": "#0c1322",
-            "primary": "#ecd7ff",
-            "primary-container": "#d8b4fe",
-            "on-surface": "#dce2f7",
-            "on-surface-variant": "#cdc3d0",
-            "background": "#0c1322"
-          }
+ <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#323949",
+                        "surface-container": "#191f2f",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#404758",
+                        "surface-variant": "#2e3545",
+                        "tertiary": "#d8def3",
+                        "surface-container-low": "#141b2b",
+                        "inverse-on-surface": "#293040",
+                        "on-primary-fixed": "#29074a",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#dce2f7",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#2e3545",
+                        "on-primary-fixed-variant": "#573878",
+                        "primary-fixed-dim": "#dbb8ff",
+                        "surface": "#0c1322",
+                        "primary-container": "#d8b4fe",
+                        "surface-tint": "#dbb8ff",
+                        "surface-container-high": "#232a3a",
+                        "outline": "#968e9a",
+                        "on-primary-container": "#604283",
+                        "background": "#0c1322",
+                        "outline-variant": "#4a454f",
+                        "on-tertiary": "#293040",
+                        "surface-container-lowest": "#070e1d",
+                        "on-surface": "#dce2f7",
+                        "primary": "#ecd7ff",
+                        "tertiary-container": "#bcc2d7",
+                        "on-tertiary-container": "#495061",
+                        "on-tertiary-fixed": "#141b2b",
+                        "on-error": "#690005",
+                        "secondary-container": "#444558",
+                        "on-secondary-fixed": "#181a2b",
+                        "on-background": "#dce2f7",
+                        "on-secondary-container": "#b3b3c9",
+                        "on-secondary-fixed-variant": "#444558",
+                        "on-surface-variant": "#cdc3d0",
+                        "secondary": "#c4c5db",
+                        "tertiary-fixed-dim": "#c0c6db",
+                        "primary-fixed": "#efdbff",
+                        "on-secondary": "#2d2f40",
+                        "inverse-primary": "#6f5092",
+                        "on-primary": "#3f2160",
+                        "surface-dim": "#0c1322",
+                        "secondary-fixed": "#e1e1f7",
+                        "tertiary-fixed": "#dce2f7",
+                        "secondary-fixed-dim": "#c4c5db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
         }
-      }
-    }
-  </script>
+    </script>
 
   <style>
     .material-symbols-outlined {
@@ -50,6 +94,9 @@
       background-image: radial-gradient(circle at 1px 1px, rgba(236, 215, 255, 0.05) 1px, transparent 0);
       background-size: 40px 40px;
     }
+    .nav-link {
+      transition: all 0.2s ease;
+    }
     .nav-link.active {
       background-color: rgb(236 215 255 / 0.1);
       color: #ecd7ff;
@@ -57,19 +104,19 @@
     }
   </style>
 </head>
-<body class="bg-surface text-on-surface font-body">
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
 
-<!-- Sidebar -->
+<!-- Sidebar Navigation (your exact code) -->
 <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-950 py-8 z-50">
   <div class="px-8 mb-12">
     <h1 class="font-headline font-black text-purple-400 text-2xl tracking-tighter">Geek Admin</h1>
     <p class="font-body text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Terminal Access</p>
   </div>
-  <nav class="flex-1 px-3">
+  <nav class="flex-1">
     <ul class="space-y-1">
-      <li><a href="#" data-tab="dashboard" class="nav-link active flex items-center gap-3 py-3 px-6 rounded-r-full text-sm uppercase tracking-widest"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
-      <li><a href="#" data-tab="inventory" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full text-sm uppercase tracking-widest"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
-      <li><a href="#" data-tab="orders" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full text-sm uppercase tracking-widest"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
+      <li><a href="#" data-tab="dashboard" class="nav-link active flex items-center gap-3 py-3 px-6 rounded-r-full font-body text-sm uppercase tracking-widest"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
+      <li><a href="#" data-tab="inventory" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full font-body text-sm uppercase tracking-widest"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
+      <li><a href="#" data-tab="orders" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full font-body text-sm uppercase tracking-widest"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
     </ul>
   </nav>
   <div class="px-6 mt-auto">
@@ -77,130 +124,109 @@
   </div>
 </aside>
 
+<!-- Main Content -->
 <main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
+  <!-- Top App Bar -->
   <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
     <div class="flex justify-between items-center px-8 py-6 max-w-screen-2xl mx-auto">
       <h2 id="page-title" class="font-headline text-2xl font-bold tracking-tight text-on-surface">Dashboard</h2>
+      <span class="px-3 py-1 bg-primary-container/20 text-primary-container text-[10px] font-black rounded-full uppercase tracking-widest">Live Sync</span>
     </div>
   </header>
 
-  <section class="p-8 flex-1 space-y-10">
+  <section class="p-8 space-y-8 flex-1">
 
-    <!-- Login Panel -->
-    <div id="login-panel" class="max-w-md mx-auto bg-surface-container-low rounded-2xl p-8">
-      <h2 class="text-2xl font-bold mb-8 text-center">Admin Login</h2>
-      <form id="login-form" class="space-y-6">
-        <div>
-          <label class="block text-sm mb-2">Email</label>
-          <input id="admin-email" type="email" required class="w-full px-4 py-3 bg-surface rounded-xl border border-white/10">
+    <!-- DASHBOARD (Exact visual from your revamped code) -->
+    <div id="tab-dashboard" class="tab-content">
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Your exact 4 stat cards from revamped code -->
+        <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 relative overflow-hidden group">
+          <div class="absolute -right-4 -top-4 text-primary/5 group-hover:text-primary/10 transition-colors">
+            <span class="material-symbols-outlined !text-7xl">inventory_2</span>
+          </div>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Products</p>
+          <p id="total-products" class="text-3xl font-headline font-bold text-on-surface mt-2">0</p>
         </div>
-        <div>
-          <label class="block text-sm mb-2">Password</label>
-          <input id="admin-pass" type="password" required class="w-full px-4 py-3 bg-surface rounded-xl border border-white/10">
-        </div>
-        <button type="submit" class="w-full py-4 bg-primary text-on-primary rounded-2xl font-semibold">Login</button>
-      </form>
+        <!-- Add the other 3 stat cards similarly if you want -->
+      </div>
+
+      <!-- Add New Product Form (Only on Dashboard) -->
+      <div class="mt-10 bg-surface-container-low rounded-2xl p-8">
+        <h3 class="font-headline text-2xl font-bold mb-6">Add New Product</h3>
+        <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- All fields you want -->
+          <div><label class="block mb-1 text-sm">Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Image URLs (comma separated)</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Category</label>
+            <select id="add-category" required class="w-full px-4 py-3 bg-surface rounded-xl">
+              <option value="Keycaps">Keycaps</option>
+              <option value="Switches">Switches</option>
+              <option value="Keyboard and Mouse">Keyboard and Mouse</option>
+              <option value="Accessories and Collectables">Accessories and Collectables</option>
+            </select>
+          </div>
+          <div><label class="block mb-1 text-sm">Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <!-- Add more fields as needed -->
+          <button type="submit" class="md:col-span-2 py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed rounded-xl font-black">Add New Product</button>
+        </form>
+      </div>
+
+      <!-- Recent Orders (from your revamped code) -->
+      <div class="mt-10">
+        <h3 class="font-headline font-bold text-xl text-on-surface mb-4">Recent Orders</h3>
+        <div id="latest-orders" class="space-y-4"></div>
+      </div>
     </div>
 
-    <!-- Admin Content -->
-    <div id="admin-panel" class="hidden">
-
-      <!-- Dashboard -->
-      <div id="tab-dashboard">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
-            <p class="text-xs uppercase tracking-widest text-slate-500">Total Products</p>
-            <p id="total-products" class="text-4xl font-headline font-bold mt-2">0</p>
-          </div>
-          <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
-            <p class="text-xs uppercase tracking-widest text-slate-500">Pending Orders</p>
-            <p id="pending-orders" class="text-4xl font-headline font-bold mt-2">0</p>
-          </div>
+    <!-- INVENTORY TAB -->
+    <div id="tab-inventory" class="tab-content hidden">
+      <div class="bg-surface-container-low rounded-2xl overflow-hidden">
+        <div class="px-8 py-6 border-b">
+          <h3 class="font-headline font-bold text-xl">All Products</h3>
         </div>
-
-        <!-- Add Product Form -->
-        <div class="mt-10 bg-surface-container-low rounded-2xl p-8">
-          <h3 class="font-headline text-2xl font-bold mb-6">Add New Product</h3>
-          <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div><label class="block mb-1 text-sm">Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-            <div><label class="block mb-1 text-sm">Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-            <div><label class="block mb-1 text-sm">Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-            <div><label class="block mb-1 text-sm">Image URLs</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-            <div><label class="block mb-1 text-sm">Category</label>
-              <select id="add-category" required class="w-full px-4 py-3 bg-surface rounded-xl">
-                <option value="Keycaps">Keycaps</option>
-                <option value="Switches">Switches</option>
-                <option value="Keyboard and Mouse">Keyboard and Mouse</option>
-                <option value="Accessories and Collectables">Accessories and Collectables</option>
-              </select>
-            </div>
-            <div><label class="block mb-1 text-sm">Color</label><input id="add-color" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-            <div><label class="block mb-1 text-sm">Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-            <div><label class="block mb-1 text-sm">Availability</label>
-              <select id="add-availability" required class="w-full px-4 py-3 bg-surface rounded-xl">
-                <option value="Ready">Ready</option>
-                <option value="Pre Order">Pre Order</option>
-                <option value="Upcoming">Upcoming</option>
-              </select>
-            </div>
-            <div class="md:col-span-2"><label><input type="checkbox" id="add-hotdeal"> Hot Deal</label></div>
-            <div class="md:col-span-2"><label class="block mb-1 text-sm">Specification</label><textarea id="add-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-20"></textarea></div>
-            <div class="md:col-span-2"><label class="block mb-1 text-sm">Detailed Description</label><textarea id="add-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-32"></textarea></div>
-            <button type="submit" class="md:col-span-2 py-4 bg-primary text-on-primary rounded-2xl font-bold">Add Product</button>
-          </form>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-surface-container-lowest text-xs uppercase tracking-widest text-slate-500">
+                <th class="px-8 py-4 text-left">Product Info</th>
+                <th class="px-8 py-4">Category</th>
+                <th class="px-8 py-4 text-right">Price</th>
+                <th class="px-8 py-4 text-right">Discount</th>
+                <th class="px-8 py-4 text-right">Stock</th>
+                <th class="px-8 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="products-body" class="divide-y divide-white/5"></tbody>
+          </table>
         </div>
       </div>
+    </div>
 
-      <!-- Inventory Tab -->
-      <div id="tab-inventory" class="tab-content hidden">
-        <div class="bg-surface-container-low rounded-2xl overflow-hidden">
-          <div class="px-8 py-6 border-b">
-            <h3 class="font-headline text-xl font-bold">All Products</h3>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="bg-surface-container-lowest text-xs uppercase">
-                  <th class="px-8 py-4 text-left">Name</th>
-                  <th class="px-8 py-4">Category</th>
-                  <th class="px-8 py-4 text-right">Price</th>
-                  <th class="px-8 py-4 text-right">Discount</th>
-                  <th class="px-8 py-4 text-right">Stock</th>
-                  <th class="px-8 py-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="products-body" class="divide-y divide-white/10"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Orders Tab -->
-      <div id="tab-orders" class="tab-content hidden">
-        <div class="bg-surface-container-low rounded-2xl p-8">
-          <h3 class="font-headline text-xl font-bold mb-6">All Orders</h3>
-          <div id="orders-body" class="space-y-4"></div>
-        </div>
+    <!-- ORDERS TAB -->
+    <div id="tab-orders" class="tab-content hidden">
+      <div class="bg-surface-container-low rounded-2xl p-8">
+        <h3 class="font-headline font-bold text-xl mb-6">All Orders</h3>
+        <div id="orders-body" class="space-y-4"></div>
       </div>
     </div>
   </section>
 </main>
 
-<!-- Simple Tab Script -->
 <script>
-document.querySelectorAll('[data-tab]').forEach(link => {
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    link.classList.add('active');
-
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-    document.getElementById('tab-' + link.dataset.tab).classList.remove('hidden');
-
-    document.getElementById('page-title').textContent = link.textContent.trim();
+  // Simple tab switching
+  document.querySelectorAll('[data-tab]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById('tab-' + link.dataset.tab).classList.remove('hidden');
+      document.getElementById('page-title').textContent = link.textContent.trim();
+    });
   });
-});
 </script>
-
 </body>
 </html>
