@@ -48,20 +48,37 @@
       background-image: radial-gradient(circle at 1px 1px, rgba(236, 215, 255, 0.05) 1px, transparent 0);
       background-size: 40px 40px;
     }
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+    .nav-link.active {
+      background-color: rgb(236 215 255 / 0.1);
+      color: #ecd7ff;
+      border-left: 4px solid #ecd7ff;
+    }
+    td[contenteditable="true"] {
+      background: #1f2937;
+      outline: none;
+    }
+    td[contenteditable="true"]:focus {
+      background: #374151;
+      box-shadow: 0 0 0 2px #c084fc;
+    }
   </style>
 </head>
-<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<body class="bg-surface text-on-surface font-body">
 
-<!-- Sidebar Navigation (your exact design) -->
+<!-- Sidebar -->
 <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-950 py-8 z-50">
   <div class="px-8 mb-12">
     <h1 class="font-headline font-black text-purple-400 text-2xl tracking-tighter">Geek Admin</h1>
     <p class="font-body text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Terminal Access</p>
   </div>
-  <nav class="flex-1">
+  <nav class="flex-1 px-3">
     <ul class="space-y-1">
-      <li><a class="flex items-center gap-3 bg-purple-500/10 text-purple-300 rounded-r-full py-3 px-6 border-l-4 border-purple-400 font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
-      <li><a class="flex items-center gap-3 text-slate-500 py-3 px-6 hover:bg-slate-900 hover:text-slate-200 transition-all duration-200 ease-in-out font-body text-sm uppercase tracking-widest" href="#"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
+      <li><a href="#" data-tab="dashboard" class="nav-link active flex items-center gap-3 py-3 px-6 rounded-r-full text-sm uppercase tracking-widest"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
+      <li><a href="#" data-tab="inventory" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full text-sm uppercase tracking-widest"><span class="material-symbols-outlined">keyboard</span><span>Inventory</span></a></li>
+      <li><a href="#" data-tab="orders" class="nav-link flex items-center gap-3 py-3 px-6 rounded-r-full text-sm uppercase tracking-widest"><span class="material-symbols-outlined">shopping_bag</span><span>Orders</span></a></li>
     </ul>
   </nav>
   <div class="px-6 mt-auto">
@@ -71,38 +88,25 @@
 
 <!-- Main Content -->
 <main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
-  <!-- Top Bar -->
   <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
     <div class="flex justify-between items-center px-8 py-6 max-w-screen-2xl mx-auto">
-      <h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface">Inventory Management</h2>
+      <h2 id="page-title" class="font-headline text-2xl font-bold tracking-tight text-on-surface">Dashboard</h2>
     </div>
   </header>
 
-  <section class="p-8 space-y-8 flex-1">
-    <!-- Login Panel -->
-    <div id="login-panel" class="max-w-md mx-auto bg-surface-container-low rounded-2xl p-8">
-      <h2 class="text-2xl font-bold mb-8 text-center">Admin Login</h2>
-      <form id="login-form" class="space-y-6">
-        <div>
-          <label class="block text-sm mb-2">Email</label>
-          <input id="admin-email" type="email" required class="w-full px-4 py-3 bg-surface rounded-xl border border-white/10 focus:border-primary">
-        </div>
-        <div>
-          <label class="block text-sm mb-2">Password</label>
-          <input id="admin-pass" type="password" required class="w-full px-4 py-3 bg-surface rounded-xl border border-white/10 focus:border-primary">
-        </div>
-        <button type="submit" class="w-full py-4 bg-primary text-on-primary rounded-2xl font-semibold text-lg">Login to Admin</button>
-      </form>
-    </div>
+  <section class="p-8 flex-1 space-y-10">
 
-    <!-- Admin Dashboard (Hidden until login) -->
-    <div id="admin-panel" class="hidden space-y-10">
-
+    <!-- DASHBOARD TAB -->
+    <div id="tab-dashboard" class="tab-content">
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
           <p class="text-xs uppercase tracking-widest text-slate-500">Total Products</p>
           <p id="total-products" class="text-4xl font-headline font-bold mt-2">0</p>
+        </div>
+        <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
+          <p class="text-xs uppercase tracking-widest text-slate-500">Low Stock</p>
+          <p id="low-stock" class="text-4xl font-headline font-bold mt-2">0</p>
         </div>
         <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
           <p class="text-xs uppercase tracking-widest text-slate-500">Pending Orders</p>
@@ -111,14 +115,14 @@
       </div>
 
       <!-- Add Product Form -->
-      <div class="bg-surface-container-low rounded-2xl p-8">
+      <div class="mt-10 bg-surface-container-low rounded-2xl p-8">
         <h3 class="font-headline text-2xl font-bold mb-6">Add New Product</h3>
         <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div><label>Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label>Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label>Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label>Image URLs (comma separated)</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label>Category</label>
+          <div><label class="block mb-1 text-sm">Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Image URLs (comma-separated)</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Category</label>
             <select id="add-category" required class="w-full px-4 py-3 bg-surface rounded-xl">
               <option value="Keycaps">Keycaps</option>
               <option value="Switches">Switches</option>
@@ -126,43 +130,44 @@
               <option value="Accessories and Collectables">Accessories and Collectables</option>
             </select>
           </div>
-          <div><label>Color</label><input id="add-color" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label>Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label>Availability</label>
+          <div><label class="block mb-1 text-sm">Color</label><input id="add-color" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+          <div><label class="block mb-1 text-sm">Availability</label>
             <select id="add-availability" required class="w-full px-4 py-3 bg-surface rounded-xl">
-              <option value="Ready">Ready to Order</option>
+              <option value="Ready">Ready</option>
               <option value="Pre Order">Pre Order</option>
               <option value="Upcoming">Upcoming</option>
             </select>
           </div>
-          <div class="md:col-span-2">
-            <label><input type="checkbox" id="add-hotdeal"> Hot Deal</label>
-          </div>
-          <div class="md:col-span-2">
-            <label>Specification</label>
-            <textarea id="add-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-20"></textarea>
-          </div>
-          <div class="md:col-span-2">
-            <label>Detailed Description</label>
-            <textarea id="add-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-32"></textarea>
-          </div>
-          <button type="submit" class="md:col-span-2 py-4 bg-primary text-on-primary rounded-2xl font-bold text-lg">Add Product</button>
+          <div class="md:col-span-2"><label><input type="checkbox" id="add-hotdeal"> Hot Deal</label></div>
+          <div class="md:col-span-2"><label class="block mb-1 text-sm">Specification</label><textarea id="add-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-20"></textarea></div>
+          <div class="md:col-span-2"><label class="block mb-1 text-sm">Detailed Description</label><textarea id="add-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-32"></textarea></div>
+          <button type="submit" class="md:col-span-2 py-4 bg-primary text-on-primary rounded-2xl font-bold">Add Product</button>
         </form>
       </div>
 
-      <!-- Products Table -->
+      <!-- Latest Orders -->
+      <div class="mt-10">
+        <h3 class="font-headline text-xl font-bold mb-4">Latest Orders</h3>
+        <div id="latest-orders" class="space-y-4"></div>
+      </div>
+    </div>
+
+    <!-- INVENTORY TAB -->
+    <div id="tab-inventory" class="tab-content hidden">
       <div class="bg-surface-container-low rounded-2xl overflow-hidden">
         <div class="px-8 py-6 border-b">
-          <h3 class="font-headline text-xl font-bold">All Products</h3>
+          <h3 class="font-headline text-xl font-bold">All Products (Editable)</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="bg-surface-container-lowest text-xs uppercase tracking-widest">
-                <th class="px-8 py-4 text-left">Product</th>
+              <tr class="bg-surface-container-lowest text-xs uppercase tracking-widest text-slate-500">
+                <th class="px-8 py-4 text-left">Name</th>
                 <th class="px-8 py-4">Category</th>
-                <th class="px-8 py-4">Price</th>
-                <th class="px-8 py-4">Stock</th>
+                <th class="px-8 py-4 text-right">Price</th>
+                <th class="px-8 py-4 text-right">Discount</th>
+                <th class="px-8 py-4 text-right">Stock</th>
                 <th class="px-8 py-4">Actions</th>
               </tr>
             </thead>
@@ -170,15 +175,33 @@
           </table>
         </div>
       </div>
+    </div>
 
-      <!-- Orders Section -->
+    <!-- ORDERS TAB -->
+    <div id="tab-orders" class="tab-content hidden">
       <div class="bg-surface-container-low rounded-2xl p-8">
-        <h3 class="font-headline text-xl font-bold mb-6">Recent Orders</h3>
+        <h3 class="font-headline text-xl font-bold mb-6">All Orders</h3>
         <div id="orders-body" class="space-y-4"></div>
       </div>
     </div>
   </section>
 </main>
+
+<script>
+// Tab switching
+document.querySelectorAll('[data-tab]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.getElementById('tab-' + link.dataset.tab).classList.remove('hidden');
+
+    document.getElementById('page-title').textContent = link.textContent.trim();
+  });
+});
+</script>
 
 </body>
 </html>
