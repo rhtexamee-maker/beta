@@ -9,11 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   
+  <!-- Firebase CDN (non-module) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
   
-  <script type="module" src="Script/admin-script.js"></script>
+  <!-- Admin Script -->
+  <script src="Script/admin-script.js"></script>
 
   <script id="tailwind-config">
     tailwind.config = {
@@ -48,21 +50,10 @@
       background-image: radial-gradient(circle at 1px 1px, rgba(236, 215, 255, 0.05) 1px, transparent 0);
       background-size: 40px 40px;
     }
-    .nav-link {
-      transition: all 0.2s ease;
-    }
     .nav-link.active {
       background-color: rgb(236 215 255 / 0.1);
       color: #ecd7ff;
       border-left: 4px solid #ecd7ff;
-    }
-    td[contenteditable="true"] {
-      background: #1f2937;
-      outline: none;
-    }
-    td[contenteditable="true"]:focus {
-      background: #374151;
-      box-shadow: 0 0 0 2px #c084fc;
     }
   </style>
 </head>
@@ -86,7 +77,6 @@
   </div>
 </aside>
 
-<!-- Main Content -->
 <main class="md:ml-64 min-h-screen cyber-lattice flex flex-col">
   <header class="sticky top-0 z-40 bg-[#0c1322]/60 backdrop-blur-xl w-full">
     <div class="flex justify-between items-center px-8 py-6 max-w-screen-2xl mx-auto">
@@ -96,99 +86,108 @@
 
   <section class="p-8 flex-1 space-y-10">
 
-    <!-- DASHBOARD TAB -->
-    <div id="tab-dashboard" class="tab-content">
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
-          <p class="text-xs uppercase tracking-widest text-slate-500">Total Products</p>
-          <p id="total-products" class="text-4xl font-headline font-bold mt-2">0</p>
+    <!-- Login Panel -->
+    <div id="login-panel" class="max-w-md mx-auto bg-surface-container-low rounded-2xl p-8">
+      <h2 class="text-2xl font-bold mb-8 text-center">Admin Login</h2>
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label class="block text-sm mb-2">Email</label>
+          <input id="admin-email" type="email" required class="w-full px-4 py-3 bg-surface rounded-xl border border-white/10">
         </div>
-        <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
-          <p class="text-xs uppercase tracking-widest text-slate-500">Low Stock</p>
-          <p id="low-stock" class="text-4xl font-headline font-bold mt-2">0</p>
+        <div>
+          <label class="block text-sm mb-2">Password</label>
+          <input id="admin-pass" type="password" required class="w-full px-4 py-3 bg-surface rounded-xl border border-white/10">
         </div>
-        <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
-          <p class="text-xs uppercase tracking-widest text-slate-500">Pending Orders</p>
-          <p id="pending-orders" class="text-4xl font-headline font-bold mt-2">0</p>
-        </div>
-      </div>
-
-      <!-- Add Product Form -->
-      <div class="mt-10 bg-surface-container-low rounded-2xl p-8">
-        <h3 class="font-headline text-2xl font-bold mb-6">Add New Product</h3>
-        <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div><label class="block mb-1 text-sm">Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label class="block mb-1 text-sm">Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label class="block mb-1 text-sm">Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label class="block mb-1 text-sm">Image URLs (comma-separated)</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label class="block mb-1 text-sm">Category</label>
-            <select id="add-category" required class="w-full px-4 py-3 bg-surface rounded-xl">
-              <option value="Keycaps">Keycaps</option>
-              <option value="Switches">Switches</option>
-              <option value="Keyboard and Mouse">Keyboard and Mouse</option>
-              <option value="Accessories and Collectables">Accessories and Collectables</option>
-            </select>
-          </div>
-          <div><label class="block mb-1 text-sm">Color</label><input id="add-color" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label class="block mb-1 text-sm">Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
-          <div><label class="block mb-1 text-sm">Availability</label>
-            <select id="add-availability" required class="w-full px-4 py-3 bg-surface rounded-xl">
-              <option value="Ready">Ready</option>
-              <option value="Pre Order">Pre Order</option>
-              <option value="Upcoming">Upcoming</option>
-            </select>
-          </div>
-          <div class="md:col-span-2"><label><input type="checkbox" id="add-hotdeal"> Hot Deal</label></div>
-          <div class="md:col-span-2"><label class="block mb-1 text-sm">Specification</label><textarea id="add-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-20"></textarea></div>
-          <div class="md:col-span-2"><label class="block mb-1 text-sm">Detailed Description</label><textarea id="add-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-32"></textarea></div>
-          <button type="submit" class="md:col-span-2 py-4 bg-primary text-on-primary rounded-2xl font-bold">Add Product</button>
-        </form>
-      </div>
-
-      <!-- Latest Orders -->
-      <div class="mt-10">
-        <h3 class="font-headline text-xl font-bold mb-4">Latest Orders</h3>
-        <div id="latest-orders" class="space-y-4"></div>
-      </div>
+        <button type="submit" class="w-full py-4 bg-primary text-on-primary rounded-2xl font-semibold">Login</button>
+      </form>
     </div>
 
-    <!-- INVENTORY TAB -->
-    <div id="tab-inventory" class="tab-content hidden">
-      <div class="bg-surface-container-low rounded-2xl overflow-hidden">
-        <div class="px-8 py-6 border-b">
-          <h3 class="font-headline text-xl font-bold">All Products (Editable)</h3>
+    <!-- Admin Content -->
+    <div id="admin-panel" class="hidden">
+
+      <!-- Dashboard -->
+      <div id="tab-dashboard">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
+            <p class="text-xs uppercase tracking-widest text-slate-500">Total Products</p>
+            <p id="total-products" class="text-4xl font-headline font-bold mt-2">0</p>
+          </div>
+          <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5">
+            <p class="text-xs uppercase tracking-widest text-slate-500">Pending Orders</p>
+            <p id="pending-orders" class="text-4xl font-headline font-bold mt-2">0</p>
+          </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-surface-container-lowest text-xs uppercase tracking-widest text-slate-500">
-                <th class="px-8 py-4 text-left">Name</th>
-                <th class="px-8 py-4">Category</th>
-                <th class="px-8 py-4 text-right">Price</th>
-                <th class="px-8 py-4 text-right">Discount</th>
-                <th class="px-8 py-4 text-right">Stock</th>
-                <th class="px-8 py-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="products-body" class="divide-y divide-white/10"></tbody>
-          </table>
+
+        <!-- Add Product Form -->
+        <div class="mt-10 bg-surface-container-low rounded-2xl p-8">
+          <h3 class="font-headline text-2xl font-bold mb-6">Add New Product</h3>
+          <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><label class="block mb-1 text-sm">Name</label><input id="add-name" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+            <div><label class="block mb-1 text-sm">Price (tk)</label><input id="add-price" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+            <div><label class="block mb-1 text-sm">Discount (tk)</label><input id="add-discount" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+            <div><label class="block mb-1 text-sm">Image URLs</label><input id="add-images" required class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+            <div><label class="block mb-1 text-sm">Category</label>
+              <select id="add-category" required class="w-full px-4 py-3 bg-surface rounded-xl">
+                <option value="Keycaps">Keycaps</option>
+                <option value="Switches">Switches</option>
+                <option value="Keyboard and Mouse">Keyboard and Mouse</option>
+                <option value="Accessories and Collectables">Accessories and Collectables</option>
+              </select>
+            </div>
+            <div><label class="block mb-1 text-sm">Color</label><input id="add-color" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+            <div><label class="block mb-1 text-sm">Stock</label><input id="add-stock" type="number" value="0" class="w-full px-4 py-3 bg-surface rounded-xl"></div>
+            <div><label class="block mb-1 text-sm">Availability</label>
+              <select id="add-availability" required class="w-full px-4 py-3 bg-surface rounded-xl">
+                <option value="Ready">Ready</option>
+                <option value="Pre Order">Pre Order</option>
+                <option value="Upcoming">Upcoming</option>
+              </select>
+            </div>
+            <div class="md:col-span-2"><label><input type="checkbox" id="add-hotdeal"> Hot Deal</label></div>
+            <div class="md:col-span-2"><label class="block mb-1 text-sm">Specification</label><textarea id="add-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-20"></textarea></div>
+            <div class="md:col-span-2"><label class="block mb-1 text-sm">Detailed Description</label><textarea id="add-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-xl h-32"></textarea></div>
+            <button type="submit" class="md:col-span-2 py-4 bg-primary text-on-primary rounded-2xl font-bold">Add Product</button>
+          </form>
         </div>
       </div>
-    </div>
 
-    <!-- ORDERS TAB -->
-    <div id="tab-orders" class="tab-content hidden">
-      <div class="bg-surface-container-low rounded-2xl p-8">
-        <h3 class="font-headline text-xl font-bold mb-6">All Orders</h3>
-        <div id="orders-body" class="space-y-4"></div>
+      <!-- Inventory Tab -->
+      <div id="tab-inventory" class="tab-content hidden">
+        <div class="bg-surface-container-low rounded-2xl overflow-hidden">
+          <div class="px-8 py-6 border-b">
+            <h3 class="font-headline text-xl font-bold">All Products</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-surface-container-lowest text-xs uppercase">
+                  <th class="px-8 py-4 text-left">Name</th>
+                  <th class="px-8 py-4">Category</th>
+                  <th class="px-8 py-4 text-right">Price</th>
+                  <th class="px-8 py-4 text-right">Discount</th>
+                  <th class="px-8 py-4 text-right">Stock</th>
+                  <th class="px-8 py-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-body" class="divide-y divide-white/10"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="tab-orders" class="tab-content hidden">
+        <div class="bg-surface-container-low rounded-2xl p-8">
+          <h3 class="font-headline text-xl font-bold mb-6">All Orders</h3>
+          <div id="orders-body" class="space-y-4"></div>
+        </div>
       </div>
     </div>
   </section>
 </main>
 
+<!-- Simple Tab Script -->
 <script>
-// Tab switching
 document.querySelectorAll('[data-tab]').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
