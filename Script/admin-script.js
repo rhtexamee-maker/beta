@@ -1,40 +1,42 @@
-// Script/admin-script.js - Plain script (no module)
+// Script/admin-script.js - Using your config.js import
 
-const firebaseConfig = { /* Paste your full firebaseConfig object here from config.js */ };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+import { firebaseConfig } from '../config.js';
 
-// Login Form
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Login
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('admin-email').value.trim();
   const pass = document.getElementById('admin-pass').value.trim();
-
   try {
-    await auth.signInWithEmailAndPassword(email, pass);
+    await signInWithEmailAndPassword(auth, email, pass);
   } catch (err) {
     alert('Login failed: ' + err.message);
   }
 });
 
 window.logoutAdmin = () => {
-  auth.signOut().then(() => location.reload());
+  signOut(auth).then(() => window.location.reload());
 };
 
 // Auth State
-auth.onAuthStateChanged((user) => {
+onAuthStateChanged(auth, (user) => {
   const loginPanel = document.getElementById('login-panel');
   const adminPanel = document.getElementById('admin-panel');
-
   if (user) {
-    if (loginPanel) loginPanel.classList.add('hidden');
-    if (adminPanel) adminPanel.classList.remove('hidden');
+    loginPanel?.classList.add('hidden');
+    adminPanel?.classList.remove('hidden');
     loadAdminData();
   } else {
-    if (loginPanel) loginPanel.classList.remove('hidden');
-    if (adminPanel) adminPanel.classList.add('hidden');
+    loginPanel?.classList.remove('hidden');
+    adminPanel?.classList.add('hidden');
   }
 });
 
@@ -42,14 +44,14 @@ async function loadAdminData() {
   await renderProducts();
 }
 
-// Render Products
+// Render Products + Click to edit full details
 async function renderProducts() {
   const tbody = document.getElementById('products-body');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  const snapshot = await db.collection('products').get();
-  snapshot.forEach(docSnap => {
+  const snapshot = await getDocs(collection(db, 'products'));
+  snapshot.forEach((docSnap) => {
     const p = { id: docSnap.id, ...docSnap.data() };
 
     const tr = document.createElement('tr');
@@ -77,12 +79,12 @@ async function renderProducts() {
   });
 }
 
-// Edit Product Modal (with Specification field)
+// Full Editable Details Modal
 window.editProduct = async (id) => {
-  const snapshot = await db.collection('products').get();
+  const snapshot = await getDocs(collection(db, 'products'));
   let product = null;
-  snapshot.forEach(doc => {
-    if (doc.id === id) product = { id: doc.id, ...doc.data() };
+  snapshot.forEach(docSnap => {
+    if (docSnap.id === id) product = { id: docSnap.id, ...docSnap.data() };
   });
 
   if (!product) return alert("Product not found");
@@ -102,8 +104,8 @@ window.editProduct = async (id) => {
             <div><label>Color</label><input id="edit-color" value="${product.color || ''}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
           </div>
           <div><label>Image URLs (comma separated)</label><input id="edit-images" value="${product.images ? product.images.join(', ') : ''}" class="w-full px-4 py-3 bg-surface rounded-2xl"></div>
-          <div><label>Specification (supports HTML)</label><textarea id="edit-spec" class="w-full px-4 py-3 bg-surface rounded-2xl h-24">${product.specification || ''}</textarea></div>
-          <div><label>Detailed Description (supports HTML)</label><textarea id="edit-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-2xl h-32">${product.detailedDescription || ''}</textarea></div>
+          <div><label>Specification (supports HTML tags)</label><textarea id="edit-spec" class="w-full px-4 py-3 bg-surface rounded-2xl h-24">${product.specification || ''}</textarea></div>
+          <div><label>Detailed Description (supports HTML tags)</label><textarea id="edit-detailed-desc" class="w-full px-4 py-3 bg-surface rounded-2xl h-32">${product.detailedDescription || ''}</textarea></div>
           <div class="flex gap-4">
             <button type="button" onclick="closeEditModal()" class="flex-1 py-4 bg-surface-container rounded-2xl">Cancel</button>
             <button type="submit" class="flex-1 py-4 bg-primary text-on-primary rounded-2xl font-bold">Save Changes</button>
@@ -131,7 +133,7 @@ window.editProduct = async (id) => {
       detailedDescription: document.getElementById('edit-detailed-desc').value.trim()
     };
 
-    await db.collection('products').doc(id).update(updateData);
+    await updateDoc(doc(db, 'products', id), updateData);
     alert('Product updated successfully!');
     closeEditModal();
     renderProducts();
@@ -143,7 +145,7 @@ window.closeEditModal = () => {
   if (modal) modal.remove();
 };
 
-// Add Product
+// Add Product Form
 document.getElementById('add-product-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const data = {
@@ -158,7 +160,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
   };
 
   try {
-    await db.collection('products').add(data);
+    await addDoc(collection(db, 'products'), data);
     alert('Product added successfully!');
     e.target.reset();
     renderProducts();
