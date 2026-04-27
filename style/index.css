@@ -1,0 +1,50 @@
+/* style.css - Custom styles + Shimmer Animation */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0c1322;
+  color: #dce2f7;
+}
+
+.headline-font { 
+  font-family: 'Space Grotesk', sans-serif; 
+}
+
+/* Shimmer Animation */
+.shimmer-placeholder {
+  background: #1f2937;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.shimmer-placeholder::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg, 
+    transparent, 
+    rgba(255,255,255,0.15), 
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Optional: Improve card hover effect */
+.bg-surface-container-low:hover {
+  transform: translateY(-4px);
+  transition: all 0.3s ease;
+}
