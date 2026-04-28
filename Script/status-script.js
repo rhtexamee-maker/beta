@@ -1,5 +1,5 @@
 // Script/status-script.js
-// Dedicated script for the new Logistics Terminal (status.html)
+// Updated for the new Logistics Terminal design
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -11,15 +11,6 @@ const db = getFirestore(app);
 
 const statusOrder = ['Pending', 'Processing', 'Dispatched', 'Delivered', 'Cancelled'];
 
-const statusColors = {
-  Pending: '#eab308',
-  Processing: '#3b82f6',
-  Dispatched: '#eab308',
-  Delivered: '#22c55e',
-  Cancelled: '#ef4444'
-};
-
-// ====================== MAIN STATUS LOOKUP ======================
 document.getElementById('status-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -32,10 +23,12 @@ document.getElementById('status-form').addEventListener('submit', async (e) => {
   }
 
   const resultContainer = document.getElementById('order-result');
+  
   resultContainer.innerHTML = `
-    <div class="text-center py-12">
-      <span class="material-symbols-outlined text-4xl text-primary animate-pulse">hourglass_top</span>
-      <p class="mt-4 text-on-surface-variant">Querying logistics database...</p>
+    <div class="text-center py-20">
+      <span class="material-symbols-outlined text-6xl text-primary animate-pulse">radar</span>
+      <p class="mt-6 text-on-surface-variant text-lg">SYNCHRONIZING WITH LATTICE...</p>
+      <p class="text-xs text-outline mt-2">QUERYING SHIPMENT METADATA</p>
     </div>`;
 
   try {
@@ -51,129 +44,129 @@ document.getElementById('status-form').addEventListener('submit', async (e) => {
 
     if (snapshot.empty) {
       resultContainer.innerHTML = `
-        <div class="bg-surface-container-low rounded-3xl p-12 text-center">
-          <span class="material-symbols-outlined text-6xl text-slate-400 mb-6 block">search_off</span>
-          <h3 class="text-xl font-medium mb-2">No orders found</h3>
-          <p class="text-on-surface-variant">We couldn't find any orders associated with <strong>${phone}</strong></p>
+        <div class="bg-surface-container-low/50 border border-white/10 rounded-3xl p-16 text-center">
+          <span class="material-symbols-outlined text-7xl text-slate-500 mb-6 block">search_off</span>
+          <h3 class="text-2xl font-headline mb-3">NO RECORDS FOUND</h3>
+          <p class="text-on-surface-variant">No orders found for phone number <span class="font-mono">${phone}</span></p>
         </div>`;
       return;
     }
 
-    const ordersHTML = [];
-
     snapshot.forEach(docSnap => {
       const order = { id: docSnap.id, ...docSnap.data() };
       const isCancelled = order.status === 'Cancelled';
-      const currentStatusIndex = statusOrder.indexOf(order.status || 'Pending');
+      const currentIndex = statusOrder.indexOf(order.status || 'Pending');
 
+      // Build items list
       let itemsHTML = '';
-
       if (order.items && Array.isArray(order.items) && order.items.length > 0) {
         order.items.forEach(item => {
           itemsHTML += `
-            <div class="flex justify-between py-3 border-b border-white/5 last:border-0">
-              <div>
-                <p class="font-medium">${item.productName}</p>
-                <p class="text-xs text-on-surface-variant">${item.color || ''} × ${item.quantity}</p>
+            <div class="flex justify-between items-center py-4 border-b border-white/5 last:border-none">
+              <div class="flex-1">
+                <p class="font-medium">${item.productName || 'Product'}</p>
+                <p class="text-xs text-on-surface-variant">${item.color || ''} • Qty: ${item.quantity || 1}</p>
               </div>
-              <p class="font-mono text-sm">৳${(item.unitPrice * item.quantity).toFixed(0)}</p>
+              <p class="font-mono text-sm">৳${(item.unitPrice || 0) * (item.quantity || 1)}</p>
             </div>`;
         });
       } else {
-        // Legacy single product order
+        // Legacy support
         itemsHTML = `
-          <div class="flex justify-between py-3 border-b border-white/5">
+          <div class="flex justify-between items-center py-4 border-b border-white/5">
             <div>
               <p class="font-medium">${order.productName || 'Product'}</p>
-              <p class="text-xs text-on-surface-variant">${order.color || ''} × ${order.quantity || 1}</p>
+              <p class="text-xs text-on-surface-variant">${order.color || ''} • Qty: ${order.quantity || 1}</p>
             </div>
             <p class="font-mono text-sm">৳${order.total || 0}</p>
           </div>`;
       }
 
-      const statusTimeline = statusOrder.map((status, index) => {
-        const isCompleted = index < currentStatusIndex && !isCancelled;
-        const isCurrent = index === currentStatusIndex && !isCancelled;
+      // Status Timeline
+      let timelineHTML = '';
+      statusOrder.forEach((status, i) => {
+        const isCompleted = i < currentIndex && !isCancelled;
+        const isCurrent = i === currentIndex && !isCancelled;
         const isCancelledStatus = status === 'Cancelled' && isCancelled;
 
-        let circleClass = 'bg-surface-container-high text-on-surface-variant';
+        let dotClass = 'bg-surface-container-high';
         let textClass = 'text-on-surface-variant';
 
         if (isCancelledStatus) {
-          circleClass = 'bg-red-500 text-white';
+          dotClass = 'bg-red-500';
           textClass = 'text-red-400';
         } else if (isCompleted || isCurrent) {
-          circleClass = 'bg-green-500 text-white';
-          textClass = 'text-green-400';
+          dotClass = 'bg-green-500';
+          textClass = isCurrent ? 'text-green-400 font-medium' : 'text-green-400';
         }
 
-        return `
+        timelineHTML += `
           <div class="flex items-center gap-4">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${circleClass}">
+            <div class="w-5 h-5 rounded-full ${dotClass} flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
               ${isCancelledStatus ? '✕' : (isCompleted || isCurrent ? '✓' : '')}
             </div>
-            <span class="${textClass} font-medium">${status}</span>
+            <span class="${textClass}">${status}</span>
           </div>`;
-      }).join('');
+      });
 
-      const cardHTML = `
-        <div class="bg-surface-container-low rounded-3xl p-8 border border-white/5">
-          <div class="flex justify-between items-start mb-8">
-            <div>
-              <div class="text-xs uppercase tracking-widest text-on-surface-variant">Order ID</div>
-              <div class="font-mono font-bold text-lg text-primary">#${order.id.slice(-8).toUpperCase()}</div>
-            </div>
-            <div class="text-right">
-              <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest
-                ${isCancelled ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}">
-                ${order.status || 'Pending'}
-              </div>
-              <div class="text-xs text-on-surface-variant mt-2">
-                ${new Date(order.timeISO).toLocaleDateString('en-GB')}
-              </div>
-            </div>
+      const card = document.createElement('div');
+      card.className = `bg-surface-container-low/70 border border-white/10 rounded-3xl p-8 scanner-glow`;
+
+      card.innerHTML = `
+        <div class="flex justify-between items-start mb-8">
+          <div>
+            <div class="text-xs uppercase tracking-widest text-outline mb-1">ENTRY_ID</div>
+            <div class="font-mono text-xl font-bold text-primary">#${order.id.slice(-8).toUpperCase()}</div>
+            <div class="text-xs text-on-surface-variant mt-1">${new Date(order.timeISO).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
           </div>
-
-          <!-- Items -->
-          <div class="mb-10">
-            ${itemsHTML}
+          
+          <div class="text-right">
+            <span class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest
+              ${isCancelled ? 'bg-red-500/10 text-red-400 border border-red-500/30' : 'bg-green-500/10 text-green-400 border border-green-500/30'}">
+              ${order.status || 'Pending'}
+            </span>
           </div>
+        </div>
 
-          <!-- Financial Summary -->
-          <div class="grid grid-cols-3 gap-4 mb-10">
-            <div>
-              <div class="text-xs text-on-surface-variant">PAID</div>
-              <div class="font-mono font-bold text-lg">৳${order.paid || 0}</div>
-            </div>
-            <div>
-              <div class="text-xs text-on-surface-variant">DUE</div>
-              <div class="font-mono font-bold text-lg ${order.due > 0 ? 'text-red-400' : ''}">৳${order.due || 0}</div>
-            </div>
-            <div>
-              <div class="text-xs text-on-surface-variant">TOTAL</div>
-              <div class="font-mono font-bold text-lg">৳${order.total || 0}</div>
-            </div>
+        <!-- Order Items -->
+        <div class="mb-10">
+          ${itemsHTML}
+        </div>
+
+        <!-- Financials -->
+        <div class="grid grid-cols-3 gap-6 mb-10 border-t border-white/10 pt-8">
+          <div>
+            <div class="text-xs text-outline uppercase tracking-widest">PAID</div>
+            <div class="text-2xl font-headline font-bold">৳${order.paid || 0}</div>
           </div>
-
-          <!-- Status Timeline -->
-          <div class="pt-6 border-t border-white/10">
-            <div class="text-xs uppercase tracking-widest text-on-surface-variant mb-6">Shipment Progress</div>
-            <div class="space-y-6">
-              ${statusTimeline}
-            </div>
+          <div>
+            <div class="text-xs text-outline uppercase tracking-widest">DUE</div>
+            <div class="text-2xl font-headline font-bold ${order.due > 0 ? 'text-red-400' : ''}">৳${order.due || 0}</div>
           </div>
-        </div>`;
+          <div>
+            <div class="text-xs text-outline uppercase tracking-widest">TOTAL</div>
+            <div class="text-2xl font-headline font-bold text-primary">৳${order.total || 0}</div>
+          </div>
+        </div>
 
-      ordersHTML.push(cardHTML);
+        <!-- Progress Timeline -->
+        <div>
+          <div class="text-xs uppercase tracking-widest text-outline mb-6">SHIPMENT PROGRESS</div>
+          <div class="space-y-6">
+            ${timelineHTML}
+          </div>
+        </div>
+      `;
+
+      resultContainer.appendChild(card);
+      resultContainer.appendChild(document.createElement('div')).className = 'h-8';
     });
 
-    resultContainer.innerHTML = ordersHTML.join('<div class="h-8"></div>');
-
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     resultContainer.innerHTML = `
-      <div class="bg-red-500/10 border border-red-500/30 rounded-3xl p-12 text-center">
-        <p class="text-red-400">Error retrieving orders. Please try again.</p>
+      <div class="bg-red-500/10 border border-red-500/30 rounded-3xl p-16 text-center">
+        <p class="text-red-400 font-medium">Failed to fetch orders. Please try again later.</p>
       </div>`;
   }
 });
