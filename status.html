@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logistics Terminal | The Geek Shop</title>
+  <title>Logistics Terminal | KINETIC LABS</title>
   
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,15 +17,13 @@
       theme: {
         extend: {
           colors: {
-            "surface-bright": "#323949",
+            "surface": "#0c1322",
             "surface-container": "#191f2f",
             "surface-container-low": "#141b2b",
             "surface-container-high": "#232a3a",
             "surface-container-highest": "#2e3545",
             "surface-container-lowest": "#070e1d",
-            "surface": "#0c1322",
             "primary": "#ecd7ff",
-            "primary-container": "#d8b4fe",
             "on-surface": "#dce2f7",
             "on-surface-variant": "#cdc3d0"
           }
@@ -37,83 +35,88 @@
   <style>
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-      vertical-align: middle;
     }
     .data-stream {
-      background-image: 
-        linear-gradient(0deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, transparent 26%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, transparent 76%),
-        linear-gradient(90deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, transparent 26%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, transparent 76%);
+      background-image:
+        linear-gradient(0deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, rgba(236, 215, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, rgba(236, 215, 255, 0.03) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, rgba(236, 215, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, rgba(236, 215, 255, 0.03) 76%, transparent 77%, transparent);
       background-size: 40px 40px;
+      animation: grid-pulse 12s ease-in-out infinite;
     }
-    .status-bar {
-      height: 4px;
-      background: linear-gradient(to right, #22c55e, #eab308, #3b82f6);
+    @keyframes grid-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    .scanner-glow {
+      box-shadow: 0 0 25px rgba(236, 215, 255, 0.08), inset 0 0 20px rgba(236, 215, 255, 0.03);
     }
   </style>
 </head>
-<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col">
+<body class="bg-background text-on-surface font-body min-h-screen flex flex-col">
 
-<!-- Top Bar -->
-<header class="sticky top-0 z-50 bg-[#0c1322]/80 backdrop-blur-xl border-b border-white/5">
-  <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
-    <div class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-purple-300 to-purple-400">
-      The Geek Shop
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
+  <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+    <div class="text-2xl font-bold tracking-tighter text-primary font-headline">KINETIC LABS</div>
+    <div class="hidden md:flex gap-8 text-sm font-medium">
+      <a href="products.html" class="hover:text-primary transition-colors">Shop</a>
+      <a href="status.html" class="text-primary">Logistics Terminal</a>
     </div>
-    <div class="text-sm font-medium text-on-surface-variant">Logistics Terminal</div>
   </div>
-</header>
+</nav>
 
-<main class="flex-1 max-w-screen-2xl mx-auto px-8 py-12 data-stream">
-  <div class="max-w-2xl mx-auto">
-    <div class="text-center mb-12">
-      <h1 class="font-headline text-5xl font-bold tracking-tighter mb-3">Track Your Gear</h1>
-      <p class="text-on-surface-variant text-lg">Enter your phone number to view order status</p>
-    </div>
+<main class="pt-20 pb-20 data-stream flex-1 relative">
+  <div class="max-w-5xl mx-auto px-8">
 
-    <!-- Search Form -->
-    <div class="bg-surface-container-low rounded-3xl p-8 mb-12">
-      <form id="status-form" class="space-y-6">
-        <div>
-          <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-3">Registered Phone Number</label>
-          <input id="phone-input" type="tel" placeholder="01XXXXXXXXX" required
-                 class="w-full bg-surface-container-lowest border border-white/10 focus:border-primary rounded-2xl px-6 py-5 text-lg focus:ring-0 outline-none">
+    <!-- Terminal Header -->
+    <header class="mb-16">
+      <div class="border-l-4 border-primary/40 pl-8">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+          <span class="uppercase text-xs tracking-[3px] font-bold text-primary">LOGISTICS INTERFACE v2.4 • ACCESS GRANTED</span>
         </div>
-        <button type="submit" 
-                class="w-full py-5 bg-primary text-on-primary-fixed font-headline font-bold text-lg rounded-2xl hover:brightness-110 transition-all active:scale-95">
-          QUERY LOGISTICS DATABASE
-        </button>
-      </form>
+        <h1 class="text-6xl md:text-7xl font-headline font-bold tracking-tighter leading-none mb-4">TRACK GEAR</h1>
+        <p class="text-on-surface-variant max-w-lg text-lg">Enter registered numeric identifier to synchronize shipment metadata.</p>
+      </div>
+    </header>
+
+    <!-- Search Panel -->
+    <div class="bg-surface-container-lowest/90 border border-primary/10 scanner-glow rounded-2xl p-1 mb-20">
+      <div class="p-8 md:p-10">
+        <form id="status-form" class="flex flex-col md:flex-row gap-6 items-end">
+          <div class="flex-1">
+            <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-medium">
+              AUTHENTICATOR • PHONE NUMBER
+            </label>
+            <input id="phone-input" 
+                   type="tel" 
+                   placeholder="019XXXXXXXX" 
+                   required
+                   class="w-full bg-surface-container-low border border-white/10 focus:border-primary rounded-2xl px-7 py-6 text-2xl font-headline tracking-widest placeholder:text-on-surface-variant/40 focus:outline-none">
+          </div>
+          <button type="submit"
+                  class="h-[62px] px-12 bg-primary hover:bg-primary-container text-on-primary-fixed font-headline font-bold uppercase tracking-widest rounded-2xl transition-all active:scale-95 flex items-center gap-3 whitespace-nowrap">
+            <span class="material-symbols-outlined">bolt</span>
+            EXECUTE QUERY
+          </button>
+        </form>
+      </div>
     </div>
 
-    <!-- Results Area -->
-    <div id="order-result" class="space-y-8">
-      <!-- Orders will be populated here by JavaScript -->
+    <!-- Results -->
+    <div id="order-result" class="space-y-10">
+      <!-- Populated by JavaScript -->
     </div>
+
   </div>
 </main>
 
 <!-- Footer -->
-<footer class="bg-slate-950 py-12 border-t border-white/5">
-  <div class="max-w-screen-2xl mx-auto px-8 text-center text-xs text-slate-500">
-    © 2026 The Geek Shop • Kinetic Laboratory Division
+<footer class="bg-surface-container-lowest border-t border-white/5 py-12">
+  <div class="max-w-7xl mx-auto px-8 text-center text-xs text-on-surface-variant">
+    © 2026 THE GEEK SHOP • KINETIC LABORATORY DIVISION • TERMINAL BUILD 0xAF92
   </div>
 </footer>
-
-<!-- Bottom Nav -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 md:hidden bg-[#0c1322]/80 backdrop-blur-lg border-t border-white/5 z-50">
-  <a href="index.html" class="flex flex-col items-center text-slate-500">
-    <span class="material-symbols-outlined">home</span>
-    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
-  </a>
-  <a href="products.html" class="flex flex-col items-center text-slate-500">
-    <span class="material-symbols-outlined">grid_view</span>
-    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Shop</span>
-  </a>
-  <a href="status.html" class="flex flex-col items-center text-purple-200">
-    <span class="material-symbols-outlined">local_shipping</span>
-    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Status</span>
-  </a>
-</nav>
 
 </body>
 </html>
