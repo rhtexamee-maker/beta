@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logistics Terminal | The Geek Shop</title>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <script type="module" src="Script/status-script.js"></script>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#323949",
+            "surface-container": "#191f2f",
+            "surface-container-low": "#141b2b",
+            "surface-container-high": "#232a3a",
+            "surface-container-highest": "#2e3545",
+            "surface-container-lowest": "#070e1d",
+            "surface": "#0c1322",
+            "primary": "#ecd7ff",
+            "primary-container": "#d8b4fe",
+            "on-surface": "#dce2f7",
+            "on-surface-variant": "#cdc3d0"
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .data-stream {
+      background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, transparent 26%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, transparent 76%),
+        linear-gradient(90deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, transparent 26%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, transparent 76%);
+      background-size: 40px 40px;
+    }
+    .status-bar {
+      height: 4px;
+      background: linear-gradient(to right, #22c55e, #eab308, #3b82f6);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col">
+
+<!-- Top Bar -->
+<header class="sticky top-0 z-50 bg-[#0c1322]/80 backdrop-blur-xl border-b border-white/5">
+  <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+    <div class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-purple-300 to-purple-400">
+      The Geek Shop
+    </div>
+    <div class="text-sm font-medium text-on-surface-variant">Logistics Terminal</div>
+  </div>
+</header>
+
+<main class="flex-1 max-w-screen-2xl mx-auto px-8 py-12 data-stream">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="font-headline text-5xl font-bold tracking-tighter mb-3">Track Your Gear</h1>
+      <p class="text-on-surface-variant text-lg">Enter your phone number to view order status</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="bg-surface-container-low rounded-3xl p-8 mb-12">
+      <form id="status-form" class="space-y-6">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-3">Registered Phone Number</label>
+          <input id="phone-input" type="tel" placeholder="01XXXXXXXXX" required
+                 class="w-full bg-surface-container-lowest border border-white/10 focus:border-primary rounded-2xl px-6 py-5 text-lg focus:ring-0 outline-none">
+        </div>
+        <button type="submit" 
+                class="w-full py-5 bg-primary text-on-primary-fixed font-headline font-bold text-lg rounded-2xl hover:brightness-110 transition-all active:scale-95">
+          QUERY LOGISTICS DATABASE
+        </button>
+      </form>
+    </div>
+
+    <!-- Results Area -->
+    <div id="order-result" class="space-y-8">
+      <!-- Orders will be populated here by JavaScript -->
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-slate-950 py-12 border-t border-white/5">
+  <div class="max-w-screen-2xl mx-auto px-8 text-center text-xs text-slate-500">
+    © 2026 The Geek Shop • Kinetic Laboratory Division
+  </div>
+</footer>
+
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 md:hidden bg-[#0c1322]/80 backdrop-blur-lg border-t border-white/5 z-50">
+  <a href="index.html" class="flex flex-col items-center text-slate-500">
+    <span class="material-symbols-outlined">home</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
+  </a>
+  <a href="products.html" class="flex flex-col items-center text-slate-500">
+    <span class="material-symbols-outlined">grid_view</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Shop</span>
+  </a>
+  <a href="status.html" class="flex flex-col items-center text-purple-200">
+    <span class="material-symbols-outlined">local_shipping</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Status</span>
+  </a>
+</nav>
+
+</body>
+</html>
