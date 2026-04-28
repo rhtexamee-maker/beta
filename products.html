@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Geek Shop | Products</title>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <script type="module" src="script.js"></script>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#323949",
+            "surface-container": "#191f2f",
+            "surface-container-low": "#141b2b",
+            "surface-container-high": "#232a3a",
+            "surface-container-highest": "#2e3545",
+            "surface-container-lowest": "#070e1d",
+            "surface": "#0c1322",
+            "primary": "#ecd7ff",
+            "primary-container": "#d8b4fe",
+            "on-surface": "#dce2f7",
+            "on-surface-variant": "#cdc3d0"
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .cyber-lattice {
+      background-image: radial-gradient(circle at 1px 1px, rgba(236, 215, 255, 0.05) 1px, transparent 0);
+      background-size: 40px 40px;
+    }
+    .shimmer {
+      background: linear-gradient(90deg, #191f2f 25%, #2e3545 50%, #191f2f 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite linear;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body">
+
+<!-- Top Bar -->
+<header class="sticky top-0 z-50 bg-[#0c1322]/80 backdrop-blur-xl border-b border-white/5">
+  <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+    <div class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-purple-300 to-purple-400">
+      The Geek Shop
+    </div>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="index.html" class="hover:text-primary transition-colors">Home</a>
+      <a href="products.html" class="text-primary border-b-2 border-primary pb-1">Shop</a>
+      <a href="#" class="hover:text-primary transition-colors">Status</a>
+    </nav>
+    <div class="flex items-center gap-6">
+      <button id="mobile-cart-link" class="flex items-center gap-2 text-on-surface hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="cart-count" class="font-mono text-sm">0</span>
+      </button>
+      <button class="text-on-surface hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-screen-2xl mx-auto px-8 py-12">
+  <div class="flex flex-col lg:flex-row gap-12">
+
+    <!-- Sidebar Filters -->
+    <aside class="w-full lg:w-72 flex-shrink-0">
+      <div class="sticky top-24 space-y-10">
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-[0.125em] text-primary mb-6">LABORATORY FILTERS</h2>
+          
+          <!-- Search -->
+          <div class="relative mb-10">
+            <input id="search-input" 
+                   class="w-full bg-surface-container-lowest border border-white/10 focus:border-primary rounded-2xl px-5 py-4 text-sm placeholder:text-on-surface-variant focus:ring-0 transition-all" 
+                   placeholder="Search keyboards, switches..." type="text"/>
+            <span class="material-symbols-outlined absolute right-5 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+          </div>
+
+          <!-- Price Range -->
+          <div class="mb-10">
+            <span class="text-xs uppercase tracking-widest text-on-surface-variant block mb-4">Price Range</span>
+            <div class="h-1 bg-surface-container-high rounded-full relative">
+              <div id="price-range-bar" class="absolute h-full bg-primary rounded-full"></div>
+            </div>
+            <div class="flex justify-between mt-3 text-xs font-mono text-on-surface-variant">
+              <span id="price-min-display">0</span>
+              <span id="price-max-display">10000</span>
+            </div>
+          </div>
+
+          <!-- Category / Other filters can be added here later -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Product Area -->
+    <div class="flex-1">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div>
+          <span class="uppercase text-[10px] tracking-[0.125em] text-primary font-bold">Catalog</span>
+          <h1 id="products-title" class="text-4xl font-bold tracking-tighter">The Inventory</h1>
+        </div>
+        <div class="text-sm text-on-surface-variant">
+          Showing <span id="showing-count">24</span> of <span id="total-count">152</span> units
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Products will be dynamically inserted here by script.js -->
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-16 flex justify-center gap-3">
+        <button class="px-5 py-3 bg-surface-container-low rounded-2xl text-sm hover:bg-surface-container-high transition-colors">Previous</button>
+        <button class="px-5 py-3 bg-primary text-on-primary rounded-2xl text-sm font-bold">1</button>
+        <button class="px-5 py-3 bg-surface-container-low rounded-2xl text-sm hover:bg-surface-container-high transition-colors">2</button>
+        <button class="px-5 py-3 bg-surface-container-low rounded-2xl text-sm hover:bg-surface-container-high transition-colors">3</button>
+        <button class="px-5 py-3 bg-surface-container-low rounded-2xl text-sm hover:bg-surface-container-high transition-colors">Next</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer (simple) -->
+<footer class="bg-slate-950 py-12 mt-20">
+  <div class="max-w-screen-2xl mx-auto px-8 text-center text-xs text-slate-500">
+    © 2026 The Geek Shop. All rights reserved.
+  </div>
+</footer>
+
+<!-- Bottom Nav for Mobile -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 md:hidden bg-[#0c1322]/80 backdrop-blur-lg border-t border-white/5 z-50">
+  <a href="index.html" class="flex flex-col items-center justify-center text-slate-500">
+    <span class="material-symbols-outlined">home</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
+  </a>
+  <a href="products.html" class="flex flex-col items-center justify-center text-purple-200">
+    <span class="material-symbols-outlined">grid_view</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Shop</span>
+  </a>
+  <a id="mobile-cart-link" class="flex flex-col items-center justify-center text-slate-500">
+    <span class="material-symbols-outlined">shopping_cart</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Cart</span>
+  </a>
+</nav>
+
+</body>
+</html>
