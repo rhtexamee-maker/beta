@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="" id="meta-description">
+  <title id="page-title"></title>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <script type="module" src="Script/product-script.js"></script>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#323949",
+            "surface-container": "#191f2f",
+            "surface-container-low": "#141b2b",
+            "surface-container-high": "#232a3a",
+            "surface-container-highest": "#2e3545",
+            "surface-container-lowest": "#070e1d",
+            "surface": "#0c1322",
+            "primary": "#ecd7ff",
+            "primary-container": "#d8b4fe",
+            "on-surface": "#dce2f7",
+            "on-surface-variant": "#cdc3d0"
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .kinetic-grid {
+      background-image: linear-gradient(to right, rgba(236, 215, 255, 0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(236, 215, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- Top Bar -->
+<header class="sticky top-0 z-50 bg-[#0c1322]/80 backdrop-blur-xl border-b border-white/5">
+  <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+    <div class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-purple-300 to-purple-400">
+      The Geek Shop
+    </div>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="index.html" class="hover:text-primary transition-colors">Home</a>
+      <a href="products.html" class="hover:text-primary transition-colors">Shop</a>
+      <a href="#" class="hover:text-primary transition-colors">Order Status</a>
+    </nav>
+    <div class="flex items-center gap-6">
+      <a id="cart-link" class="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="cart-count" class="font-mono">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="relative kinetic-grid min-h-screen">
+  <!-- Main Product Section -->
+  <section class="max-w-screen-2xl mx-auto px-8 py-12 lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-16">
+    
+    <!-- Gallery - Left Side -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="relative group aspect-square lg:aspect-[4/3] bg-surface-container-low overflow-hidden rounded-3xl">
+        <img id="main-image" alt="Product Image" 
+             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+      </div>
+
+      <!-- Thumbnails -->
+      <div id="thumbnail-gallery" class="grid grid-cols-4 gap-4">
+        <!-- Thumbnails loaded by JS -->
+      </div>
+    </div>
+
+    <!-- Product Info - Right Side -->
+    <div class="lg:col-span-5 flex flex-col justify-center space-y-10">
+      <div class="space-y-4">
+        <div id="product-badges" class="flex items-center gap-3"></div>
+        <h1 id="product-name" class="text-5xl lg:text-7xl font-display font-bold tracking-tighter leading-none"></h1>
+        <p id="product-price" class="text-3xl font-display font-light text-primary"></p>
+      </div>
+
+      <div class="space-y-6">
+        <p id="product-short-desc" class="text-on-surface-variant text-lg leading-relaxed max-w-md"></p>
+
+        <div class="flex flex-col gap-4">
+          <button onclick="addToCartFromDetail()" 
+                  class="w-full py-5 bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed font-display font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:shadow-xl transition-all active:scale-95">
+            <span class="material-symbols-outlined">bolt</span>
+            Order Now
+          </button>
+          <button onclick="addToCartFromDetail()" 
+                  class="w-full py-5 bg-surface-container-high text-primary font-display font-bold text-lg rounded-2xl border border-outline-variant/30 hover:bg-surface-container transition-all active:scale-95">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- Fast Specs -->
+      <div class="grid grid-cols-2 gap-px bg-outline-variant/10 rounded-2xl overflow-hidden">
+        <div class="bg-surface-container-low p-5">
+          <span class="text-xs uppercase tracking-widest text-slate-500">Mount Type</span>
+          <span id="spec-mount" class="block text-lg font-medium">Gasket Mount</span>
+        </div>
+        <div class="bg-surface-container-low p-5">
+          <span class="text-xs uppercase tracking-widest text-slate-500">Connectivity</span>
+          <span id="spec-connect" class="block text-lg font-medium">USB-C / Bluetooth</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Specs & Description -->
+  <section class="max-w-screen-2xl mx-auto px-8 py-24 border-t border-outline-variant/10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+      <div class="space-y-8">
+        <h2 class="text-3xl font-display font-bold tracking-tight">The Kinetic Experience</h2>
+        <div id="product-detailed-desc" class="space-y-6 text-on-surface-variant leading-loose"></div>
+      </div>
+
+      <!-- Technical Specs -->
+      <div class="bg-surface-container-low rounded-3xl p-10 border border-outline-variant/10">
+        <h3 class="text-sm font-bold tracking-[0.3em] uppercase text-primary mb-10">Technical Specifications</h3>
+        <div id="tech-specs" class="grid grid-cols-1 gap-8">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Products -->
+  <section class="max-w-screen-2xl mx-auto px-8 py-24">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-[0.4em] text-primary">Lab Recommendations</span>
+        <h2 class="text-4xl font-display font-bold">May Interest You</h2>
+      </div>
+    </div>
+    <div id="related-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+</main>
+
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 md:hidden bg-[#0c1322]/80 backdrop-blur-lg border-t border-white/5 z-50">
+  <a href="index.html" class="flex flex-col items-center text-slate-500">
+    <span class="material-symbols-outlined">home</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Home</span>
+  </a>
+  <a href="products.html" class="flex flex-col items-center text-purple-200">
+    <span class="material-symbols-outlined">grid_view</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Shop</span>
+  </a>
+  <a id="mobile-cart-link" class="flex flex-col items-center text-slate-500">
+    <span class="material-symbols-outlined">shopping_cart</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter mt-1">Cart</span>
+  </a>
+</nav>
+
+</body>
+</html>
