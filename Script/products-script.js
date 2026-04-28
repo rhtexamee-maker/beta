@@ -1,4 +1,4 @@
-// Script/products-script.js - Fixed & Improved Version
+// Script/products-script.js - Final Version with Dynamic Filters & Pagination
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -10,7 +10,7 @@ const db = getFirestore(app);
 
 let allProducts = [];
 let currentPage = 1;
-const PRODUCTS_PER_PAGE = 20;
+const PRODUCTS_PER_PAGE = 21;   // Changed to 21 as requested
 
 // ====================== CART ======================
 function getCart() {
@@ -23,7 +23,7 @@ function saveCart(cart) {
   updateCartCount();
 }
 
-function addToCart(productId, qty = 1) {
+function addToCart(productId) {
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
 
@@ -41,7 +41,7 @@ function addToCart(productId, qty = 1) {
     : Number(product.price);
 
   if (existing) {
-    existing.qty += qty;
+    existing.qty += 1;
   } else {
     cart.push({
       id: productId,
@@ -49,7 +49,7 @@ function addToCart(productId, qty = 1) {
       color: product.color || '',
       price: finalPrice,
       image: product.images?.[0] || '',
-      qty: qty
+      qty: 1
     });
   }
 
@@ -59,9 +59,10 @@ function addToCart(productId, qty = 1) {
 
 function updateCartCount() {
   const countEl = document.getElementById('cart-count');
-  if (!countEl) return;
-  const cart = getCart();
-  countEl.textContent = cart.reduce((sum, item) => sum + item.qty, 0);
+  if (countEl) {
+    const cart = getCart();
+    countEl.textContent = cart.reduce((sum, item) => sum + item.qty, 0);
+  }
 }
 
 // ====================== PRODUCT CARD ======================
@@ -88,12 +89,12 @@ function createProductCard(product) {
     <div class="aspect-[4/3] relative overflow-hidden bg-surface-container-lowest">
       ${product.images && product.images[0] ? 
         `<img src="${product.images[0]}" alt="${product.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">` : 
-        `<div class="w-full h-full flex items-center justify-center text-slate-500 text-sm">No Image</div>`}
+        `<div class="w-full h-full flex items-center justify-center text-slate-500">No Image</div>`}
       
       ${statusHTML}
 
       <button onclick="addToCart('${product.id}'); event.stopImmediatePropagation()" 
-              class="absolute bottom-4 right-4 w-11 h-11 bg-surface-bright/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-xl">
+              class="absolute bottom-4 right-4 w-11 h-11 bg-surface-bright/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
         <span class="material-symbols-outlined">add_shopping_cart</span>
       </button>
     </div>
@@ -121,7 +122,71 @@ function createProductCard(product) {
   return card;
 }
 
-// ====================== RENDER WITH PAGINATION ======================
+// ====================== DYNAMIC FILTERS ======================
+function extractSpecs(description) {
+  if (!description) return {};
+  const specs = {};
+  const lines = description.toString().split('\n');
+  lines.forEach(line => {
+    const match = line.match(/^([^:]+?)\s*:\s*(.+)$/);
+    if (match) {
+      const key = match[1].trim().toLowerCase();
+      specs[key] = match[2].trim();
+    }
+  });
+  return specs;
+}
+
+function renderDynamicFilters(products) {
+  const container = document.querySelector('aside'); // or create a specific filter container
+  // For simplicity, we'll add color and category filters dynamically
+
+  const colors = [...new Set(products.map(p => p.color).filter(Boolean))];
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+
+  // You can expand this to show more dynamic specs if needed
+  console.log("Available colors:", colors);
+  console.log("Available categories:", categories);
+}
+
+// ====================== PAGINATION ======================
+function renderPagination() {
+  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
+  const paginationContainer = document.getElementById('pagination');
+  if (!paginationContainer) return;
+
+  paginationContainer.innerHTML = '';
+
+  // Previous button
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Previous';
+  prevBtn.className = `px-5 py-3 rounded-2xl text-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-container-high'}`;
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) renderProducts(currentPage - 1);
+  });
+  paginationContainer.appendChild(prevBtn);
+
+  // Page numbers
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = `px-5 py-3 rounded-2xl text-sm font-medium ${i === currentPage ? 'bg-primary text-on-primary' : 'hover:bg-surface-container-high'}`;
+    btn.addEventListener('click', () => renderProducts(i));
+    paginationContainer.appendChild(btn);
+  }
+
+  // Next button
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.className = `px-5 py-3 rounded-2xl text-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-container-high'}`;
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.addEventListener('click', () => {
+    if (currentPage < totalPages) renderProducts(currentPage + 1);
+  });
+  paginationContainer.appendChild(nextBtn);
+}
+
 function renderProducts(page = 1) {
   currentPage = page;
   const grid = document.getElementById('product-grid');
@@ -131,22 +196,16 @@ function renderProducts(page = 1) {
 
   const start = (page - 1) * PRODUCTS_PER_PAGE;
   const end = start + PRODUCTS_PER_PAGE;
-  const paginatedProducts = allProducts.slice(start, end);
+  const paginated = allProducts.slice(start, end);
 
-  paginatedProducts.forEach(product => {
+  paginated.forEach(product => {
     grid.appendChild(createProductCard(product));
   });
 
   document.getElementById('result-count').textContent = 
-    `Showing ${start + 1}–${Math.min(end, allProducts.length)} of ${allProducts.length} products`;
+    `Showing ${start + 1}–${Math.min(end, allProducts.length)} of ${allProducts.length}`;
 
   renderPagination();
-}
-
-function renderPagination() {
-  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
-  // You can enhance this with actual pagination buttons if needed
-  console.log(`Page ${currentPage} of ${totalPages}`);
 }
 
 // ====================== SEARCH ======================
@@ -163,12 +222,11 @@ function setupSearch() {
     }
 
     const filtered = allProducts.filter(p => 
-      p.name.toLowerCase().includes(term) ||
+      (p.name && p.name.toLowerCase().includes(term)) ||
       (p.category && p.category.toLowerCase().includes(term)) ||
       (p.color && p.color.toLowerCase().includes(term))
     );
 
-    // Render filtered results without pagination for simplicity (or implement later)
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
@@ -190,33 +248,24 @@ async function loadProducts() {
       ...doc.data()
     }));
 
-    // Sort by name
     allProducts.sort((a, b) => a.name.localeCompare(b.name));
 
+    renderDynamicFilters(allProducts);
     renderProducts(1);
     updateCartCount();
   } catch (err) {
-    console.error("Failed to load products:", err);
+    console.error("Error loading products:", err);
     document.getElementById('product-grid').innerHTML = `
-      <p class="col-span-full text-center text-red-400 py-12">Failed to load products. Please try again.</p>`;
+      <p class="col-span-full text-center text-red-400 py-12">Failed to load products.</p>`;
   }
 }
 
 // ====================== INIT ======================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('%c✅ Products Page Initialized', 'color:#a78bfa; font-weight:bold');
-
+  console.log('%c✅ Products Page Loaded', 'color:#c084fc; font-weight:bold');
   loadProducts();
   setupSearch();
   updateCartCount();
-
-  // Mobile cart
-  const mobileCart = document.getElementById('mobile-cart-link');
-  if (mobileCart) {
-    mobileCart.addEventListener('click', () => {
-      alert("Cart slider coming soon...");
-    });
-  }
 });
 
 window.addToCart = addToCart;
