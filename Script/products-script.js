@@ -1,18 +1,18 @@
-// Script/products-script.js
-// Dedicated script for the new revamped products.html
+// Script/products-script.js - Fixed & Improved Version
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import { firebaseConfig } from '../config.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Global products cache
 let allProducts = [];
+let currentPage = 1;
+const PRODUCTS_PER_PAGE = 20;
 
-// Cart functions (shared with other pages)
+// ====================== CART ======================
 function getCart() {
   const cart = localStorage.getItem('cart');
   return cart ? JSON.parse(cart) : [];
@@ -60,63 +60,58 @@ function addToCart(productId, qty = 1) {
 function updateCartCount() {
   const countEl = document.getElementById('cart-count');
   if (!countEl) return;
-
   const cart = getCart();
-  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-  countEl.textContent = totalItems;
+  countEl.textContent = cart.reduce((sum, item) => sum + item.qty, 0);
 }
 
-// Create Product Card (New Tailwind Design)
+// ====================== PRODUCT CARD ======================
 function createProductCard(product) {
   const hasDiscount = Number(product.discount) > 0;
   const price = Number(product.price) || 0;
   const finalPrice = hasDiscount ? price - Number(product.discount) : price;
 
-  const isUpcoming = product.availability === 'Upcoming';
-  const isOOS = !isUpcoming && Number(product.stock) <= 0 && product.availability !== 'Pre Order';
+  let statusHTML = '';
+  if (product.availability === 'Upcoming') {
+    statusHTML = `<span class="absolute top-4 right-4 bg-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full">UPCOMING</span>`;
+  } else if (product.availability === 'Pre Order') {
+    statusHTML = `<span class="absolute top-4 right-4 bg-blue-500 text-white text-[10px] font-black px-3 py-1 rounded-full">PRE ORDER</span>`;
+  } else if (Number(product.stock) <= 0) {
+    statusHTML = `<span class="absolute top-4 right-4 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full">OUT OF STOCK</span>`;
+  } else {
+    statusHTML = `<span class="absolute top-4 right-4 bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-full">IN STOCK</span>`;
+  }
 
   const card = document.createElement('div');
-  card.className = `product-card bg-surface-container-low rounded-2xl overflow-hidden group cursor-pointer`;
+  card.className = `product-card bg-surface-container-low rounded-2xl overflow-hidden group cursor-pointer relative`;
 
   card.innerHTML = `
     <div class="aspect-[4/3] relative overflow-hidden bg-surface-container-lowest">
       ${product.images && product.images[0] ? 
-        `<img src="${product.images[0]}" alt="${product.name}" 
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">` : 
-        `<div class="w-full h-full flex items-center justify-center text-slate-500">No Image</div>`}
+        `<img src="${product.images[0]}" alt="${product.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">` : 
+        `<div class="w-full h-full flex items-center justify-center text-slate-500 text-sm">No Image</div>`}
       
-      <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-        ${product.hotDeal ? `<span class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full">HOT DEAL</span>` : ''}
-        ${isUpcoming ? `<span class="bg-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full">UPCOMING</span>` : ''}
-        ${isOOS ? `<span class="bg-slate-600 text-white text-[10px] font-black px-3 py-1 rounded-full">OUT OF STOCK</span>` : ''}
-      </div>
+      ${statusHTML}
 
       <button onclick="addToCart('${product.id}'); event.stopImmediatePropagation()" 
-              class="absolute bottom-4 right-4 w-11 h-11 bg-surface-bright/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
+              class="absolute bottom-4 right-4 w-11 h-11 bg-surface-bright/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-xl">
         <span class="material-symbols-outlined">add_shopping_cart</span>
       </button>
     </div>
 
     <div class="p-6">
-      <div class="flex justify-between items-start mb-2">
-        <h3 class="font-medium text-lg leading-tight line-clamp-2">${product.name}</h3>
-        <span class="font-mono font-bold text-primary">
-          ৳${finalPrice}
-        </span>
-      </div>
+      <h3 class="font-medium text-lg leading-tight line-clamp-2 mb-1">${product.name}</h3>
+      ${product.color ? `<p class="text-sm text-on-surface-variant mb-3">Color: ${product.color}</p>` : ''}
       
-      <p class="text-sm text-on-surface-variant mb-4 line-clamp-2">
-        ${product.color ? `Color: ${product.color}` : ''}
-      </p>
-
-      <div class="flex gap-2">
-        ${product.category ? `<span class="text-[10px] bg-surface-container-high px-3 py-1 rounded-full">${product.category}</span>` : ''}
-        ${product.stock > 0 ? `<span class="text-[10px] bg-green-500/10 text-green-400 px-3 py-1 rounded-full">In Stock</span>` : ''}
+      <div class="flex justify-between items-end">
+        <div>
+          <span class="font-mono font-bold text-primary text-xl">৳${finalPrice}</span>
+          ${hasDiscount ? `<span class="text-xs line-through text-slate-500 ml-2">৳${price}</span>` : ''}
+        </div>
+        <span class="text-xs bg-surface-container-high px-3 py-1 rounded-full">${product.category || 'General'}</span>
       </div>
     </div>
   `;
 
-  // Click card to view details (you can expand this later)
   card.addEventListener('click', (e) => {
     if (!e.target.closest('button')) {
       window.location.href = `product.html?id=${product.id}`;
@@ -126,51 +121,67 @@ function createProductCard(product) {
   return card;
 }
 
-// Render all products
-async function renderProducts(filteredProducts = null) {
+// ====================== RENDER WITH PAGINATION ======================
+function renderProducts(page = 1) {
+  currentPage = page;
   const grid = document.getElementById('product-grid');
   if (!grid) return;
 
   grid.innerHTML = '';
 
-  const productsToShow = filteredProducts || allProducts;
+  const start = (page - 1) * PRODUCTS_PER_PAGE;
+  const end = start + PRODUCTS_PER_PAGE;
+  const paginatedProducts = allProducts.slice(start, end);
 
-  if (productsToShow.length === 0) {
-    grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-12">No products found.</p>`;
-    return;
-  }
-
-  productsToShow.forEach(product => {
+  paginatedProducts.forEach(product => {
     grid.appendChild(createProductCard(product));
   });
 
-  document.getElementById('result-count').textContent = `Showing ${productsToShow.length} products`;
+  document.getElementById('result-count').textContent = 
+    `Showing ${start + 1}–${Math.min(end, allProducts.length)} of ${allProducts.length} products`;
+
+  renderPagination();
 }
 
-// Search functionality
+function renderPagination() {
+  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
+  // You can enhance this with actual pagination buttons if needed
+  console.log(`Page ${currentPage} of ${totalPages}`);
+}
+
+// ====================== SEARCH ======================
 function setupSearch() {
   const searchInput = document.getElementById('search-input');
   if (!searchInput) return;
 
-  searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase().trim();
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase().trim();
 
     if (!term) {
-      renderProducts();
+      renderProducts(1);
       return;
     }
 
-    const filtered = allProducts.filter(product => 
-      product.name.toLowerCase().includes(term) ||
-      (product.category && product.category.toLowerCase().includes(term)) ||
-      (product.color && product.color.toLowerCase().includes(term))
+    const filtered = allProducts.filter(p => 
+      p.name.toLowerCase().includes(term) ||
+      (p.category && p.category.toLowerCase().includes(term)) ||
+      (p.color && p.color.toLowerCase().includes(term))
     );
 
-    renderProducts(filtered);
+    // Render filtered results without pagination for simplicity (or implement later)
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = '';
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<p class="col-span-full text-center py-12 text-slate-400">No products found for "${term}"</p>`;
+      return;
+    }
+
+    filtered.forEach(p => grid.appendChild(createProductCard(p)));
   });
 }
 
-// Load products from Firestore
+// ====================== LOAD PRODUCTS ======================
 async function loadProducts() {
   try {
     const snapshot = await getDocs(collection(db, 'products'));
@@ -179,37 +190,33 @@ async function loadProducts() {
       ...doc.data()
     }));
 
-    // Sort by name by default
+    // Sort by name
     allProducts.sort((a, b) => a.name.localeCompare(b.name));
 
-    renderProducts();
+    renderProducts(1);
     updateCartCount();
   } catch (err) {
-    console.error("Error loading products:", err);
+    console.error("Failed to load products:", err);
     document.getElementById('product-grid').innerHTML = `
-      <p class="col-span-full text-center text-red-400 py-12">
-        Failed to load products. Please try again later.
-      </p>`;
+      <p class="col-span-full text-center text-red-400 py-12">Failed to load products. Please try again.</p>`;
   }
 }
 
-// Initialize
+// ====================== INIT ======================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('%c🚀 Products Page Loaded', 'color:#c084fc; font-weight:bold');
+  console.log('%c✅ Products Page Initialized', 'color:#a78bfa; font-weight:bold');
 
   loadProducts();
   setupSearch();
   updateCartCount();
 
-  // Mobile cart link
-  const mobileCartLink = document.getElementById('mobile-cart-link');
-  if (mobileCartLink) {
-    mobileCartLink.addEventListener('click', () => {
-      alert('Cart functionality - Open cart slider (to be implemented)');
-      // You can expand this to open cart slider later
+  // Mobile cart
+  const mobileCart = document.getElementById('mobile-cart-link');
+  if (mobileCart) {
+    mobileCart.addEventListener('click', () => {
+      alert("Cart slider coming soon...");
     });
   }
 });
 
-// Make addToCart available globally for inline onclick
 window.addToCart = addToCart;
