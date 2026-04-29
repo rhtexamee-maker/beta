@@ -4,28 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Logistics Terminal | KINETIC LABS</title>
-  
+
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
   <script type="module" src="Script/status-script.js"></script>
 
-  <script id="tailwind-config">
+  <script>
     tailwind.config = {
       darkMode: "class",
       theme: {
         extend: {
           colors: {
-            "surface": "#0c1322",
-            "surface-container": "#191f2f",
+            background: "#070c17",
+            surface: "#0c1322",
             "surface-container-low": "#141b2b",
             "surface-container-high": "#232a3a",
             "surface-container-highest": "#2e3545",
             "surface-container-lowest": "#070e1d",
-            "primary": "#ecd7ff",
+            primary: "#ecd7ff",
+            secondary: "#c4c5db",
+            outline: "#968e9a",
             "on-surface": "#dce2f7",
             "on-surface-variant": "#cdc3d0"
+          },
+          fontFamily: {
+            headline: ["Space Grotesk"],
+            body: ["Inter"],
+            label: ["Inter"]
           }
         }
       }
@@ -33,90 +41,67 @@
   </script>
 
   <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    body { background:#070c17; }
+
+    .tech-grid-overlay {
+      background-image:
+        linear-gradient(rgba(236, 215, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(236, 215, 255, 0.1) 1px, transparent 1px);
+      background-size: 8px 8px;
     }
+
     .data-stream {
       background-image:
         linear-gradient(0deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, rgba(236, 215, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, rgba(236, 215, 255, 0.03) 76%, transparent 77%, transparent),
         linear-gradient(90deg, transparent 24%, rgba(236, 215, 255, 0.03) 25%, rgba(236, 215, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(236, 215, 255, 0.03) 75%, rgba(236, 215, 255, 0.03) 76%, transparent 77%, transparent);
       background-size: 40px 40px;
-      animation: grid-pulse 12s ease-in-out infinite;
     }
-    @keyframes grid-pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
+
     .scanner-glow {
-      box-shadow: 0 0 25px rgba(236, 215, 255, 0.08), inset 0 0 20px rgba(236, 215, 255, 0.03);
+      box-shadow: 0 0 20px rgba(236,215,255,0.05), inset 0 0 15px rgba(236,215,255,0.02);
     }
   </style>
 </head>
-<body class="bg-background text-on-surface font-body min-h-screen flex flex-col">
 
-<!-- Top Navigation -->
+<body class="text-on-surface font-body min-h-screen flex flex-col">
+
+<!-- NAV -->
 <nav class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
   <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
-    <div class="text-2xl font-bold tracking-tighter text-primary font-headline">KINETIC LABS</div>
-    <div class="hidden md:flex gap-8 text-sm font-medium">
-      <a href="products.html" class="hover:text-primary transition-colors">Shop</a>
+    <div class="text-2xl font-bold text-primary font-headline">KINETIC LABS</div>
+    <div class="hidden md:flex gap-8 text-sm">
+      <a href="products.html" class="hover:text-primary">Shop</a>
       <a href="status.html" class="text-primary">Logistics Terminal</a>
     </div>
   </div>
 </nav>
 
-<main class="pt-20 pb-20 data-stream flex-1 relative">
-  <div class="max-w-5xl mx-auto px-8">
+<main class="pt-24 pb-20 data-stream flex-1">
+  <div class="max-w-6xl mx-auto px-8">
 
-    <!-- Terminal Header -->
-    <header class="mb-16">
-      <div class="border-l-4 border-primary/40 pl-8">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-          <span class="uppercase text-xs tracking-[3px] font-bold text-primary">LOGISTICS INTERFACE v2.4 • ACCESS GRANTED</span>
-        </div>
-        <h1 class="text-6xl md:text-7xl font-headline font-bold tracking-tighter leading-none mb-4">TRACK GEAR</h1>
-        <p class="text-on-surface-variant max-w-lg text-lg">Enter registered numeric identifier to synchronize shipment metadata.</p>
+    <!-- HEADER -->
+    <div class="border-l-2 border-primary/30 pl-8 mb-16">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-2 h-2 bg-primary animate-pulse"></div>
+        <span class="text-xs uppercase tracking-widest text-primary">LOGISTICS INTERFACE</span>
       </div>
-    </header>
-
-    <!-- Search Panel -->
-    <div class="bg-surface-container-lowest/90 border border-primary/10 scanner-glow rounded-2xl p-1 mb-20">
-      <div class="p-8 md:p-10">
-        <form id="status-form" class="flex flex-col md:flex-row gap-6 items-end">
-          <div class="flex-1">
-            <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-3 font-medium">
-              AUTHENTICATOR • PHONE NUMBER
-            </label>
-            <input id="phone-input" 
-                   type="tel" 
-                   placeholder="019XXXXXXXX" 
-                   required
-                   class="w-full bg-surface-container-low border border-white/10 focus:border-primary rounded-2xl px-7 py-6 text-2xl font-headline tracking-widest placeholder:text-on-surface-variant/40 focus:outline-none">
-          </div>
-          <button type="submit"
-                  class="h-[62px] px-12 bg-primary hover:bg-primary-container text-on-primary-fixed font-headline font-bold uppercase tracking-widest rounded-2xl transition-all active:scale-95 flex items-center gap-3 whitespace-nowrap">
-            <span class="material-symbols-outlined">bolt</span>
-            EXECUTE QUERY
-          </button>
-        </form>
-      </div>
+      <h1 class="text-6xl font-headline font-bold mb-4">TRACK GEAR</h1>
+      <p class="text-on-surface-variant">Enter phone to track orders</p>
     </div>
 
-    <!-- Results -->
-    <div id="order-result" class="space-y-10">
-      <!-- Populated by JavaScript -->
-    </div>
+    <!-- FORM -->
+    <form id="status-form" class="flex gap-4 mb-16">
+      <input id="phone-input" type="text"
+        placeholder="019XXXXXXXX"
+        class="flex-1 bg-surface-container-low border border-white/10 px-6 py-4 text-xl font-headline tracking-widest">
+      <button class="bg-primary px-8 font-bold">SEARCH</button>
+    </form>
+
+    <!-- RESULTS -->
+    <div id="order-result" class="space-y-10"></div>
 
   </div>
 </main>
-
-<!-- Footer -->
-<footer class="bg-surface-container-lowest border-t border-white/5 py-12">
-  <div class="max-w-7xl mx-auto px-8 text-center text-xs text-on-surface-variant">
-    © 2026 THE GEEK SHOP • KINETIC LABORATORY DIVISION • TERMINAL BUILD 0xAF92
-  </div>
-</footer>
 
 </body>
 </html>
