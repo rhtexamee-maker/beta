@@ -1,20 +1,15 @@
-// Script/index-script.js
-// Full cart system + homepage rendering for the new Tailwind design
-
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
 import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-
-import { firebaseConfig, BKASH_NUMBER, COD_NUMBER, DELIVERY_FEE } from '../config.js';
+import { firebaseConfig } from '../config.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const productsMap = new Map();
 
-// ==================== CART SYSTEM ====================
+/* ================= CART ================= */
 function getCart() {
-  const cart = localStorage.getItem('cart');
-  return cart ? JSON.parse(cart) : [];
+  return JSON.parse(localStorage.getItem('cart') || '[]');
 }
 
 function saveCart(cart) {
@@ -22,134 +17,183 @@ function saveCart(cart) {
   updateCartUI();
 }
 
-function addToCart(productId, qty = 1) {
-  const product = productsMap.get(productId);
-  if (!product || product.availability === 'Upcoming') {
-    alert("This product is not available yet.");
+function updateCartUI() {
+  const countEl = document.getElementById('cart-count');
+  if (!countEl) return;
+
+  const total = getCart().reduce((sum, i) => sum + i.qty, 0);
+  countEl.textContent = total;
+}
+
+function addToCart(id) {
+  const product = productsMap.get(id);
+  if (!product) return;
+
+  if (product.availability === 'Upcoming') {
+    alert('Not available yet');
     return;
   }
 
   const isOOS = Number(product.stock) <= 0 && product.availability !== 'Pre Order';
   if (isOOS) {
-    alert('This product is out of stock!');
+    alert('Out of stock');
     return;
   }
 
-  let cart = getCart();
-  const existing = cart.find(item => item.id === productId);
-  const finalPrice = Number(product.discount) > 0 
-    ? (Number(product.price) - Number(product.discount)) 
-    : Number(product.price);
+  const cart = getCart();
+  const existing = cart.find(i => i.id === id);
 
-  if (existing) {
-    existing.qty += qty;
-  } else {
+  const price = product.discount > 0
+    ? product.price - product.discount
+    : product.price;
+
+  if (existing) existing.qty++;
+  else {
     cart.push({
-      id: productId,
+      id,
       name: product.name,
-      color: product.color || '',
-      price: finalPrice,
+      price,
       image: product.images?.[0] || '',
-      qty: qty
+      qty: 1
     });
   }
+
   saveCart(cart);
-  alert(`${product.name} added to cart!`);
 }
 
-function updateCartUI() {
-  const cart = getCart();
-  const countEl = document.getElementById('cart-count');
-  if (countEl) countEl.textContent = cart.reduce((sum, i) => sum + i.qty, 0);
+/* ================= HERO ================= */
+function renderHero(product) {
+  if (!product) return;
+
+  document.getElementById('hero-title').innerHTML =
+    `${product.name.split(' ')[0]} <br>
+     <span class="text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary-container">
+       ${product.name.split(' ').slice(1).join(' ')}
+     </span>`;
+
+  document.getElementById('hero-desc').textContent =
+    product.description || "Premium mechanical gear engineered for perfection.";
+
+  document.getElementById('hero-image').src =
+    product.images?.[0] || '';
+
+  document.getElementById('hero-badge').textContent =
+    product.hotDeal ? "HOT DROP" : "New Arrival";
+
+  document.getElementById('hero-shop').onclick = () => {
+    window.location.href = `products.html?id=${product.id}`;
+  };
+
+  document.getElementById('hero-build').onclick = () => {
+    window.location.href = `product.html?id=${product.id}`;
+  };
 }
 
-// ==================== TAILWIND CARDS ====================
+/* ================= CATEGORY ================= */
 function createCategoryCard(c) {
-  const card = document.createElement('div');
-  card.className = `bg-surface-container rounded-2xl p-8 flex flex-col justify-between group overflow-hidden relative min-h-[250px] cursor-pointer hover:scale-[1.02] transition-transform`;
-  card.innerHTML = `
-    <div class="z-10">
-      <h3 class="headline-font text-2xl font-bold text-on-surface">${c.name}</h3>
-    </div>
-    <img src="${c.bg}" class="absolute bottom-0 right-0 w-3/4 opacity-30 group-hover:opacity-70 transition-all duration-700" alt="${c.name}">
+  const el = document.createElement('div');
+
+  el.className = `
+    bg-surface-container rounded-2xl p-8 flex flex-col justify-between
+    group overflow-hidden relative min-h-[250px]
+    cursor-pointer transition-all hover:scale-[1.02]
   `;
-  card.addEventListener('click', () => {
+
+  el.innerHTML = `
+    <div class="z-10">
+      <h3 class="headline-font text-xl font-bold">${c.name}</h3>
+    </div>
+
+    <img src="${c.bg}"
+      class="absolute bottom-0 right-0 w-2/3 opacity-30
+      group-hover:opacity-60 transition-all duration-500">
+  `;
+
+  el.onclick = () =>
     window.location.href = `products.html?category=${encodeURIComponent(c.name)}`;
-  });
-  return card;
+
+  return el;
 }
 
+/* ================= PRODUCT CARD ================= */
 function createProductCard(p) {
-  const hasDiscount = Number(p.discount) > 0;
-  const finalPrice = hasDiscount ? Number(p.price) - Number(p.discount) : Number(p.price);
-  const isOOS = Number(p.stock) <= 0 && p.availability !== 'Pre Order';
+  const price = p.discount > 0 ? p.price - p.discount : p.price;
+  const isOOS = p.stock <= 0 && p.availability !== 'Pre Order';
 
-  const card = document.createElement('div');
-  card.className = `bg-surface-container-low rounded-2xl p-6 group hover:bg-surface-container transition-all border border-outline-variant/10 cursor-pointer`;
+  const el = document.createElement('div');
 
-  card.innerHTML = `
-    <div class="relative mb-6 overflow-hidden rounded-xl">
-      <img src="${p.images?.[0] || ''}" alt="${p.name}" 
-           class="w-full h-52 object-contain transition-transform group-hover:scale-105 duration-500"
-           onerror="this.src='https://via.placeholder.com/400x300/1f2937/9ca3af?text=No+Image'">
-      ${p.hotDeal ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full font-bold">HOT DEAL</span>` : ''}
-      ${isOOS ? `<span class="absolute top-3 right-3 bg-gray-700 text-white text-xs px-3 py-1 rounded-full">OUT OF STOCK</span>` : ''}
+  el.className = `
+    bg-surface-container-low rounded-2xl p-6 group
+    hover:bg-surface-container transition-all
+    border border-outline-variant/10
+  `;
+
+  el.innerHTML = `
+    <div class="relative overflow-visible mb-8">
+
+      <div class="absolute -inset-4 bg-primary/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+      <img src="${p.images?.[0] || ''}"
+        class="w-full h-48 object-contain transform group-hover:-translate-y-4 group-hover:scale-110 transition-transform duration-500">
+
     </div>
+
     <div class="space-y-3">
       <div class="flex justify-between items-start">
         <span class="text-on-surface-variant text-xs uppercase tracking-tighter">${p.category}</span>
-        <span class="text-primary font-bold">৳${finalPrice}</span>
+        <span class="text-primary font-bold">৳${price}</span>
       </div>
-      <h4 class="headline-font text-xl font-bold text-on-surface line-clamp-2">${p.name}</h4>
-      ${p.color ? `<p class="text-sm text-on-surface-variant">${p.color}</p>` : ''}
-      <button onclick="addToCart('${p.id}'); event.stopImmediatePropagation()" 
-              class="w-full mt-4 py-3.5 bg-surface-variant/50 hover:bg-primary hover:text-on-primary font-semibold rounded-xl transition-all">
-        Add to Cart
+
+      <h4 class="headline-font text-xl font-bold">${p.name}</h4>
+
+      <button onclick="addToCart('${p.id}')"
+        class="w-full bg-surface-variant/40 py-3 rounded-xl font-bold text-sm mt-4 hover:bg-primary hover:text-on-primary transition-colors">
+        Quick Add
       </button>
     </div>
   `;
-  return card;
+
+  return el;
 }
 
-// ==================== INIT HOMEPAGE ====================
-async function initHomepage() {
-  try {
-    const snapshot = await getDocs(collection(db, 'products'));
-    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+/* ================= INIT ================= */
+async function init() {
+  const snap = await getDocs(collection(db, 'products'));
 
-    products.forEach(p => productsMap.set(p.id, p));
+  const products = snap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }));
 
-    // Render Categories
-    const categoriesContainer = document.getElementById('categories');
-    if (categoriesContainer) {
-      categoriesContainer.innerHTML = '';
-      const catList = [
-        { name: 'Keyboards', bg: 'k&b.png' },
-        { name: 'Keycaps', bg: 'k.png' },
-        { name: 'Switches', bg: 's.png' },
-        { name: 'Accessories and Collectables', bg: 'c&a.png' }
-      ];
-      catList.forEach(c => categoriesContainer.appendChild(createCategoryCard(c)));
-    }
+  products.forEach(p => productsMap.set(p.id, p));
 
-    // Render May Interest You
-    const interestContainer = document.getElementById('interest-products');
-    if (interestContainer) {
-      interestContainer.innerHTML = '';
-      const shuffled = products.sort(() => Math.random() - 0.5).slice(0, 8);
-      shuffled.forEach(p => interestContainer.appendChild(createProductCard(p)));
-    }
+  /* ===== HERO: latest product ===== */
+  const latest = [...products]
+    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))[0];
 
-    updateCartUI();
+  renderHero(latest);
 
-    console.log('✅ Homepage with full cart system loaded successfully');
-  } catch (err) {
-    console.error('Failed to load homepage:', err);
-  }
+  /* ===== CATEGORIES ===== */
+  const categories = [
+    { name: 'Keyboards', bg: 'k&b.png' },
+    { name: 'Switches', bg: 's.png' },
+    { name: 'Keycaps', bg: 'k.png' },
+    { name: 'Accessories', bg: 'c&a.png' }
+  ];
+
+  const catEl = document.getElementById('categories');
+  categories.forEach(c => catEl.appendChild(createCategoryCard(c)));
+
+  /* ===== PRODUCTS ===== */
+  const grid = document.getElementById('interest-products');
+
+  products
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 8)
+    .forEach(p => grid.appendChild(createProductCard(p)));
+
+  updateCartUI();
 }
 
-// Start
-document.addEventListener('DOMContentLoaded', initHomepage);
-
-// Expose addToCart globally so buttons can call it
+document.addEventListener('DOMContentLoaded', init);
 window.addToCart = addToCart;
