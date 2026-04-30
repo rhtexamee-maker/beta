@@ -30,7 +30,6 @@ tailwind.config = {
     extend: {
       colors: {
         background:"#0c1322",
-        surface:"#0c1322",
         primary:"#ecd7ff",
         "primary-container":"#d8b4fe",
         "on-primary":"#3f2160",
@@ -52,7 +51,7 @@ tailwind.config = {
 
 <body class="bg-background text-on-surface">
 
-<!-- ================= HEADER ================= -->
+<!-- HEADER -->
 <header class="bg-[#0c1322]/60 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
   <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
 
@@ -61,10 +60,10 @@ tailwind.config = {
     </div>
 
     <nav class="hidden md:flex gap-8 headline-font">
-      <a class="text-slate-400 hover:text-purple-200">Keyboards</a>
-      <a class="text-slate-400 hover:text-purple-200">Switches</a>
-      <a class="text-slate-400 hover:text-purple-200">Keycaps</a>
-      <a class="text-slate-400 hover:text-purple-200">Desk Mats</a>
+      <a>Keyboards</a>
+      <a>Switches</a>
+      <a>Keycaps</a>
+      <a>Desk Mats</a>
     </nav>
 
     <div class="flex items-center gap-6">
@@ -75,15 +74,13 @@ tailwind.config = {
   </div>
 </header>
 
-<!-- ================= MAIN ================= -->
 <main class="max-w-screen-2xl mx-auto px-8">
 
-<!-- ================= HERO ================= -->
-<section class="relative min-h-[819px] flex items-center pt-12 pb-24 overflow-hidden">
+<!-- HERO -->
+<section class="relative min-h-[819px] flex items-center pt-12 pb-24">
 
   <div class="grid md:grid-cols-12 gap-8 w-full items-center">
 
-    <!-- LEFT -->
     <div class="md:col-span-7 flex flex-col gap-8">
 
       <span id="hero-badge"
@@ -93,12 +90,10 @@ tailwind.config = {
 
       <h1 id="hero-title"
         class="headline-font text-6xl md:text-8xl font-bold leading-[0.9]">
-        LOADING...
+        Loading...
       </h1>
 
-      <p id="hero-desc"
-        class="text-lg text-on-surface-variant max-w-lg">
-      </p>
+      <p id="hero-desc" class="text-lg text-on-surface-variant max-w-lg"></p>
 
       <div class="flex gap-4">
         <button id="hero-shop"
@@ -114,7 +109,6 @@ tailwind.config = {
 
     </div>
 
-    <!-- RIGHT -->
     <div class="md:col-span-5 relative">
       <div class="absolute -top-20 -right-20 w-80 h-80 bg-primary/20 blur-[120px] rounded-full"></div>
 
@@ -127,25 +121,20 @@ tailwind.config = {
   </div>
 </section>
 
-<!-- ================= CATEGORIES ================= -->
+<!-- CATEGORIES -->
 <section class="py-24">
   <h2 class="headline-font text-4xl font-bold mb-10">Categories</h2>
-
   <div id="categories" class="grid md:grid-cols-4 gap-6"></div>
 </section>
 
-<!-- ================= PRODUCTS ================= -->
+<!-- PRODUCTS -->
 <section class="py-24">
-  <div class="flex justify-between mb-12">
-    <h2 class="headline-font text-4xl font-bold">May Interest You</h2>
-  </div>
-
+  <h2 class="headline-font text-4xl font-bold mb-12">May Interest You</h2>
   <div id="interest-products" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
 </section>
 
 </main>
 
-<!-- ================= FOOTER ================= -->
 <footer class="bg-slate-950 py-12 border-t border-white/5">
   <div class="max-w-screen-2xl mx-auto flex justify-between px-8 text-xs text-slate-500 uppercase">
     <span>© THE GEEK SHOP</span>
@@ -153,7 +142,6 @@ tailwind.config = {
   </div>
 </footer>
 
-<!-- ================= SCRIPT ================= -->
 <script type="module" src="./Script/index-script.js"></script>
 
 </body>
