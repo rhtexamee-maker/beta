@@ -1,5 +1,10 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
 import { firebaseConfig } from '../config.js';
 
 const app = initializeApp(firebaseConfig);
@@ -18,27 +23,13 @@ function saveCart(cart) {
 }
 
 function updateCartUI() {
-  const countEl = document.getElementById('cart-count');
-  if (!countEl) return;
-
   const total = getCart().reduce((sum, i) => sum + i.qty, 0);
-  countEl.textContent = total;
+  document.getElementById('cart-count').textContent = total;
 }
 
 function addToCart(id) {
   const product = productsMap.get(id);
   if (!product) return;
-
-  if (product.availability === 'Upcoming') {
-    alert('Not available yet');
-    return;
-  }
-
-  const isOOS = Number(product.stock) <= 0 && product.availability !== 'Pre Order';
-  if (isOOS) {
-    alert('Out of stock');
-    return;
-  }
 
   const cart = getCart();
   const existing = cart.find(i => i.id === id);
@@ -65,60 +56,59 @@ function addToCart(id) {
 function renderHero(product) {
   if (!product) return;
 
-  document.getElementById('hero-title').innerHTML =
-    `${product.name.split(' ')[0]} <br>
-     <span class="text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary-container">
-       ${product.name.split(' ').slice(1).join(' ')}
-     </span>`;
+  const words = product.name.split(' ');
+
+  document.getElementById('hero-title').innerHTML = `
+    ${words[0]}
+    <br>
+    <span class="text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary-container">
+      ${words.slice(1).join(' ')}
+    </span>
+  `;
 
   document.getElementById('hero-desc').textContent =
-    product.description || "Premium mechanical gear engineered for perfection.";
+    product.description || '';
 
   document.getElementById('hero-image').src =
     product.images?.[0] || '';
 
-  document.getElementById('hero-badge').textContent =
-    product.hotDeal ? "HOT DROP" : "New Arrival";
+  document.getElementById('hero-shop').onclick =
+    () => location.href = `product.html?id=${product.id}`;
 
-  document.getElementById('hero-shop').onclick = () => {
-    window.location.href = `products.html?id=${product.id}`;
-  };
-
-  document.getElementById('hero-build').onclick = () => {
-    window.location.href = `product.html?id=${product.id}`;
-  };
+  document.getElementById('hero-build').onclick =
+    () => location.href = `product.html?id=${product.id}`;
 }
 
-/* ================= CATEGORY ================= */
-function createCategoryCard(c) {
-  const el = document.createElement('div');
-
-  el.className = `
-    bg-surface-container rounded-2xl p-8 flex flex-col justify-between
-    group overflow-hidden relative min-h-[250px]
-    cursor-pointer transition-all hover:scale-[1.02]
-  `;
+/* ================= CATEGORIES ================= */
+function renderCategories() {
+  const el = document.getElementById('categories');
 
   el.innerHTML = `
-    <div class="z-10">
-      <h3 class="headline-font text-xl font-bold">${c.name}</h3>
+    <div class="md:col-span-2 md:row-span-2 bg-surface-container-low rounded-2xl p-10 relative cursor-pointer"
+      onclick="location.href='products.html?category=Keyboards'">
+      <h3 class="headline-font text-3xl font-bold mb-4">Keyboards</h3>
     </div>
 
-    <img src="${c.bg}"
-      class="absolute bottom-0 right-0 w-2/3 opacity-30
-      group-hover:opacity-60 transition-all duration-500">
+    <div class="bg-surface-container rounded-2xl p-8 cursor-pointer"
+      onclick="location.href='products.html?category=Switches'">
+      <h3 class="headline-font text-xl font-bold">Switches</h3>
+    </div>
+
+    <div class="bg-surface-container rounded-2xl p-8 cursor-pointer"
+      onclick="location.href='products.html?category=Keycaps'">
+      <h3 class="headline-font text-xl font-bold">Keycaps</h3>
+    </div>
+
+    <div class="md:col-span-2 bg-surface-container rounded-2xl p-8 cursor-pointer"
+      onclick="location.href='products.html?category=Accessories'">
+      <h3 class="headline-font text-2xl font-bold">Accessories</h3>
+    </div>
   `;
-
-  el.onclick = () =>
-    window.location.href = `products.html?category=${encodeURIComponent(c.name)}`;
-
-  return el;
 }
 
 /* ================= PRODUCT CARD ================= */
 function createProductCard(p) {
   const price = p.discount > 0 ? p.price - p.discount : p.price;
-  const isOOS = p.stock <= 0 && p.availability !== 'Pre Order';
 
   const el = document.createElement('div');
 
@@ -129,28 +119,20 @@ function createProductCard(p) {
   `;
 
   el.innerHTML = `
-    <div class="relative overflow-visible mb-8">
+    <img src="${p.images?.[0] || ''}"
+      class="w-full h-48 object-contain mb-6">
 
-      <div class="absolute -inset-4 bg-primary/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-      <img src="${p.images?.[0] || ''}"
-        class="w-full h-48 object-contain transform group-hover:-translate-y-4 group-hover:scale-110 transition-transform duration-500">
-
+    <div class="flex justify-between text-xs uppercase">
+      <span>${p.category}</span>
+      <span class="text-primary font-bold">৳${price}</span>
     </div>
 
-    <div class="space-y-3">
-      <div class="flex justify-between items-start">
-        <span class="text-on-surface-variant text-xs uppercase tracking-tighter">${p.category}</span>
-        <span class="text-primary font-bold">৳${price}</span>
-      </div>
+    <h4 class="headline-font text-xl font-bold mt-2">${p.name}</h4>
 
-      <h4 class="headline-font text-xl font-bold">${p.name}</h4>
-
-      <button onclick="addToCart('${p.id}')"
-        class="w-full bg-surface-variant/40 py-3 rounded-xl font-bold text-sm mt-4 hover:bg-primary hover:text-on-primary transition-colors">
-        Quick Add
-      </button>
-    </div>
+    <button onclick="addToCart('${p.id}')"
+      class="w-full mt-4 bg-surface-variant/40 py-3 rounded-xl font-bold hover:bg-primary hover:text-on-primary">
+      Quick Add
+    </button>
   `;
 
   return el;
@@ -167,24 +149,13 @@ async function init() {
 
   products.forEach(p => productsMap.set(p.id, p));
 
-  /* ===== HERO: latest product ===== */
-  const latest = [...products]
-    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))[0];
+  const latest = [...products].sort(
+    (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+  )[0];
 
   renderHero(latest);
+  renderCategories();
 
-  /* ===== CATEGORIES ===== */
-  const categories = [
-    { name: 'Keyboards', bg: 'k&b.png' },
-    { name: 'Switches', bg: 's.png' },
-    { name: 'Keycaps', bg: 'k.png' },
-    { name: 'Accessories', bg: 'c&a.png' }
-  ];
-
-  const catEl = document.getElementById('categories');
-  categories.forEach(c => catEl.appendChild(createCategoryCard(c)));
-
-  /* ===== PRODUCTS ===== */
   const grid = document.getElementById('interest-products');
 
   products
